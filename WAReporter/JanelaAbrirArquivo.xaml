@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WAReporter" Loaded="Window_Loaded"
         mc:Ignorable="d" ResizeMode="NoResize"
-        Title="Abrir Banco de Dados WhatsApp" Height="180" Width="640">
+        Title="Abrir Banco de Dados WhatsApp" Height="180" Width="650">
     <StackPanel>
         <StackPanel Orientation="Horizontal"  Margin="5">
             <Label Content="Arquivo*:" Width="70"/>

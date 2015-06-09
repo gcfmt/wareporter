@@ -57,12 +57,20 @@ namespace WAReporter
             if(String.IsNullOrWhiteSpace(arquivoTextBox.Text))
             {
                 MessageBox.Show("É necessário preencher um nome de arquivo de banco de dados.");
-
+                arquivoButton.Focus();
+                return;
             }
 
 
             if (File.Exists(arquivoTextBox.Text) && arquivoTextBox.Text.EndsWith("db"))
             {
+                if (!String.IsNullOrWhiteSpace(waDbTextBox.Text) && !File.Exists(waDbTextBox.Text))
+                {
+                    MessageBox.Show("Arquivo \"" + waDbTextBox.Text + "\" não encontrado. Insira um endereço válido ou mantenha o endereço em branco.");
+                    waDbTextBox.Focus();
+                    return;
+                }
+
                 SelecaoOk(null, null);
                 this.Close();
             } else

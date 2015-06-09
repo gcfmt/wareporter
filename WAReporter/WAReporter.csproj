@@ -77,11 +77,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Emoji.cs" />
+    <Compile Include="Utilitarios\UtilitariosData.cs" />
     <Page Include="JanelaAbrirArquivo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="JanelaPrincipal.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -89,15 +91,23 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Banco.cs" />
     <Compile Include="JanelaAbrirArquivo.xaml.cs">
       <DependentUpon>JanelaAbrirArquivo.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="JanelaPrincipal.xaml.cs">
+      <DependentUpon>JanelaPrincipal.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Modelo\WaContact.cs" />
+    <Compile Include="Modelo\Chat.cs" />
+    <Compile Include="Modelo\GroupParticipant.cs" />
+    <Compile Include="Modelo\GroupParticipantHistory.cs" />
+    <Compile Include="Modelo\MediaRef.cs" />
+    <Compile Include="Modelo\Message.cs" />
+    <Compile Include="Modelo\Receipt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
