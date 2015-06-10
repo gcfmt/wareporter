@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
@@ -9,13 +10,12 @@ namespace WAReporter
     /// </summary>
     public partial class JanelaPrincipal : Window
     {
+        private string CaminhoMsgStoreDb = "";
+        private string CaminhoWaDb = "";
         
         public JanelaPrincipal()
         {
             InitializeComponent();
-
-
-
         }
 
         private void AbrirCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -23,9 +23,20 @@ namespace WAReporter
             var janelaAbrirArquivo = new JanelaAbrirArquivo();
             janelaAbrirArquivo.SelecaoOk += delegate
             {
-                var resultadoCarregamento = Banco.CarregarBanco(janelaAbrirArquivo.arquivoTextBox.Text, janelaAbrirArquivo.waDbTextBox.Text);
-               
+                CaminhoMsgStoreDb = janelaAbrirArquivo.arquivoTextBox.Text;
+                CaminhoWaDb = janelaAbrirArquivo.waDbTextBox.Text;
+                var resultadoCarregamento = Banco.CarregarBanco(CaminhoMsgStoreDb, CaminhoWaDb);
+                if(resultadoCarregamento.StartsWith("ERRO"))
+                {
+                    MessageBox.Show(resultadoCarregamento);
+                }
+                else
+                {
+                    contatosDataGrid.ItemsSource = Banco.Chats;
 
+                    Midia.Procurar(Directory.GetParent(System.IO.Path.GetDirectoryName(janelaAbrirArquivo.arquivoTextBox.Text)).FullName);
+
+                }
             };
             janelaAbrirArquivo.ShowDialog();
         }
@@ -38,6 +49,21 @@ namespace WAReporter
         private void SairCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private void selecionarTodosButton_Click(object sender, RoutedEventArgs e)
+        {
+           foreach(var row in contatosDataGrid.Items)
+            {
+                
+            }
+        }
+
+        private void gerarRelatorioButton_Click(object sender, RoutedEventArgs e)
+        {
+            var chats = Banco.Chats;
+            var caminhoRelatorio = Path.Combine(Path.GetDirectoryName(CaminhoMsgStoreDb), "WhatsApp - Relatório.html");
+            var resultado = GeradorRelatorio.GerarRelatorioHtml(chats, caminhoRelatorio);
         }
     }
 }

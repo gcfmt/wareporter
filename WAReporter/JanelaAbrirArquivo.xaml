@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WAReporter" Loaded="Window_Loaded"
         mc:Ignorable="d" ResizeMode="NoResize"
-        Title="Abrir Banco de Dados WhatsApp" Height="180" Width="650">
+        Title="Abrir Banco de Dados WhatsApp" Height="200" Width="650">
     <StackPanel>
         <StackPanel Orientation="Horizontal"  Margin="5">
             <Label Content="Arquivo*:" Width="70"/>
@@ -24,7 +24,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="3,10,3,5">
             <Button x:Name="OkButton" Click="OkButton_Click" Margin="5,0" Height="28" Content="Ok" Width="70"/>
-            <Button x:Name="CancelarButton" Margin="5,0" Height="28" Content="Cancelar" Width="70"/>
+            <Button x:Name="CancelarButton" Margin="5,0" Height="28" Content="Cancelar" Width="70" Click="CancelarButton_Click"/>
 
         </StackPanel>
     </StackPanel>

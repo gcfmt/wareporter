@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WAReporter"
-        mc:Ignorable="d"
-        Title="WAReport - Gerador de Relatórios de Conversações WhatsApp" Height="600" Width="800">
+        mc:Ignorable="d" WindowState="Maximized"
+        Title="WAReport - Gerador de Relatórios de Conversações WhatsApp">
     <Window.Resources>
         <RoutedUICommand x:Key="Abrir" Text="Abrir" />
         <RoutedUICommand x:Key="Extrair" Text="Extrair" />
@@ -29,12 +29,25 @@
                 <MenuItem Header="Sair" Command="{StaticResource Sair}" InputGestureText="Alt+F4"/>
                 </MenuItem>
         </Menu>
-        <DataGrid x:Name="contatosDataGrid">
+        <DataGrid x:Name="contatosDataGrid" AutoGenerateColumns="False" CanUserResizeRows="False" Margin="10" Height="400">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Contato"/>
-                <DataGridTextColumn Header="Última Mensagem"/>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Binding="{Binding Subject}" Width="60*" Header="Contato" IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding Creation}" Width="40*" Header="Última Mensagem" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
-        
+        <StackPanel Orientation="Horizontal" Margin="5" x:Name="selecaoChatsStackPanel">
+            <Button x:Name="selecionarTodosButton" Margin="0,0,5,0" Content="Selecionar Todos" Click="selecionarTodosButton_Click"/>
+            <Button x:Name="selecionarNenhumButton" Margin="0,0,5,0" Content="Selecionar Nenhum"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="5" x:Name="acoesChatsStackPanel">
+            <Button x:Name="gerarRelatorioButton" Margin="0,0,5,0" Content="Gerar Relatório" Click="gerarRelatorioButton_Click"/>
+        </StackPanel>
     </StackPanel>
 </Window>

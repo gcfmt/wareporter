@@ -20,5 +20,8 @@ namespace WAReporter.Modelo
         public int? Archived { get; set; }
         public int? SortTimestamp { get; set; }
         public int? ModTag { get; set; }
+
+        public String NomeContato { get; set; }
+        public List<Message> Mensagens { get; set; }
     }
 }

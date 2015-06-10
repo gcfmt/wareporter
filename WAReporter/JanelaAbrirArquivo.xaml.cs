@@ -49,6 +49,10 @@ namespace WAReporter
             {
                 // Open document 
                 arquivoTextBox.Text = dlg.FileName;
+
+                var pathWaDb = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dlg.FileName), "wa.db");
+                if (File.Exists(pathWaDb) && String.IsNullOrWhiteSpace(waDbTextBox.Text))
+                    waDbTextBox.Text = pathWaDb;
             }
         }
 
@@ -77,6 +81,11 @@ namespace WAReporter
                 MessageBox.Show("Arquivo \"" + arquivoTextBox.Text + "\" não encontrado.");
 
             arquivoButton.Focus();
+        }
+
+        private void CancelarButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

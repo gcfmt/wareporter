@@ -16,7 +16,7 @@ namespace WAReporter.Modelo
         public DateTime Timestamp { get; set; }
         public String MediaUrl { get; set; }
         public String MediaMimeType { get; set; }
-        public String MediaWaType { get; set; }
+        public MediaWhatsappType MediaWaType { get; set; }
         public int MediaSize { get; set; }
         public String MediaName { get; set; }
         public String MediaCaption { get; set; }
@@ -33,8 +33,18 @@ namespace WAReporter.Modelo
         public DateTime ReceiptDeviceTimestamp { get; set; }
         public DateTime ReadDeviceTimestamp { get; set; }
         public DateTime PlayedDeviceTimestamp { get; set; }
-        public byte RawData { get; set; }
+        public byte[] RawData { get; set; }
         public int RecipientCount { get; set; }
         public String ParticipantHash { get; set; }
     }
+
+    public enum MediaWhatsappType
+    {
+        MEDIA_WHATSAPP_TEXT = 0,
+        MEDIA_WHATSAPP_IMAGE = 1,
+        MEDIA_WHATSAPP_AUDIO = 2,
+        MEDIA_WHATSAPP_VIDEO = 3,
+        MEDIA_WHATSAPP_CONTACT = 4,
+        MEDIA_WHATSAPP_LOCATION = 5
+    };
 }
