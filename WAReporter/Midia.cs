@@ -13,20 +13,41 @@ namespace WAReporter
         public static List<String> CaminhoImagens { get; set; }
         public static List<String> CaminhoVideos { get; set; }
         public static List<String> CaminhoAudios { get; set; }
+        public static List<String> CaminhoAvatares { get; set; }
+        public static String CaminhoFotoPessoal { get; set; }
+        public static Dictionary<String, String> PropriedadesUsuario { get; set; }
 
-        public static string Procurar(string caminhoPastaMidias)
+        public static string Procurar(string caminhoPastaWhatsApp)
         {
             var resultado = "";
             
-            string mask = Path.Combine(caminhoPastaMidias, "*.*");
-            CaminhoImagens = UtilitariosArquivo.ObterArquivos(mask, (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
-            CaminhoVideos = UtilitariosArquivo.ObterArquivos(mask, (p) => Path.GetExtension(p.Name) == ".mp4").ToList();
-            CaminhoAudios = UtilitariosArquivo.ObterArquivos(mask, (p) => Path.GetExtension(p.Name) == ".aac").ToList();
+            CaminhoImagens = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
+            CaminhoVideos = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".mp4").ToList();
+            CaminhoAudios = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".aac").ToList();
+
+            var caminhoPastaFiles = "";
+            if (Directory.Exists(Path.Combine(caminhoPastaWhatsApp, "f"))) caminhoPastaFiles = Path.Combine(caminhoPastaWhatsApp, "f");
+            else if (Directory.Exists(Path.Combine(caminhoPastaWhatsApp, "files"))) caminhoPastaFiles = Path.Combine(caminhoPastaWhatsApp, "files");
+
+            if (File.Exists(Path.Combine(caminhoPastaFiles, "me.jpg"))) CaminhoFotoPessoal = Path.Combine(caminhoPastaFiles, "me.jpg");
+        
+            if (!String.IsNullOrWhiteSpace(caminhoPastaFiles))
+            {
+                var pastaAvatars = Path.Combine(caminhoPastaFiles, "Avatars");
+                if (Directory.Exists(pastaAvatars))
+                    foreach(var arquivoAvatar in Directory.GetFiles(pastaAvatars).Where(p => p.EndsWith(".j")))
+                        if(!File.Exists(arquivoAvatar + "pg"))
+                            File.Copy(arquivoAvatar, arquivoAvatar + "pg");
+                CaminhoAvatares = UtilitariosArquivo.ObterArquivos(Path.Combine(pastaAvatars, "*.*"), (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
+            }
 
             //Muda os caminhos de absolutos para relativos, em relação à pasta de banco de dados (também é a pasta em que o relatório html é gerado)
-            for(int i = 0; i < CaminhoImagens.Count; i++) CaminhoImagens[i] = CaminhoImagens[i].Replace(caminhoPastaMidias, "..");
-            for(int i = 0; i < CaminhoVideos.Count; i++) CaminhoVideos[i] = CaminhoVideos[i].Replace(caminhoPastaMidias, "..");
-            for(int i = 0; i < CaminhoAudios.Count; i++) CaminhoAudios[i] = CaminhoAudios[i].Replace(caminhoPastaMidias, "..");
+            for (int i = 0; i < CaminhoImagens.Count; i++) CaminhoImagens[i] = CaminhoImagens[i].Replace(caminhoPastaWhatsApp, "..");
+            for (int i = 0; i < CaminhoVideos.Count; i++) CaminhoVideos[i] = CaminhoVideos[i].Replace(caminhoPastaWhatsApp, "..");
+            for (int i = 0; i < CaminhoAudios.Count; i++) CaminhoAudios[i] = CaminhoAudios[i].Replace(caminhoPastaWhatsApp, "..");
+            for (int i = 0; i < CaminhoAvatares.Count; i++) CaminhoAvatares[i] = CaminhoAvatares[i].Replace(caminhoPastaWhatsApp, "..");
+            CaminhoFotoPessoal = CaminhoFotoPessoal.Replace(caminhoPastaWhatsApp, "..");
+
 
             return resultado;
         }
@@ -42,5 +63,12 @@ namespace WAReporter
             else                
                 return "data:image/jpg;base64,"+ Convert.ToBase64String(mensagem.RawData);
         }
+
+        public static String ObterAvatar(String Id)
+        {
+            return CaminhoAvatares.FirstOrDefault(p => p.Contains(Id)) ?? "";
+        }
+
+
     }
 }

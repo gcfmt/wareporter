@@ -57,16 +57,38 @@ namespace WAReporter
             arquivoHtml.WriteLine("<body>");
             arquivoHtml.WriteLine("<button type=\"button\" onclick=\"alert('Hello world!')\">Mostrar Todos</button>");
             arquivoHtml.WriteLine("<button type=\"button\" onclick=\"alert('Hello world!')\">Recolher Todos</button>");
-            arquivoHtml.WriteLine("<div id=\"accordion\">");
+
+
+            arquivoHtml.WriteLine("<table>");
+            
+
+
+  //arquivoHtml.WriteLine("<div id=\"accordion\">");
+            arquivoHtml.WriteLine("<tr><b>");
+            arquivoHtml.WriteLine("<td>Código</td>");
+            arquivoHtml.WriteLine("<td>Imagem</td>");
+            arquivoHtml.WriteLine("<td>Título</td>");
+            arquivoHtml.WriteLine("<td>Tipo</td>");
+            arquivoHtml.WriteLine("<td>Última Mensagem</td>");
+            arquivoHtml.WriteLine("</b></tr>");
+
 
             foreach (var chat in chats)
             {
-                arquivoHtml.WriteLine("<h3>");
+                bool isGrupo = chat.KeyRemoteJid.Contains("-");
+                
+                arquivoHtml.WriteLine("<tr>"+chat.Id+"<tr>");
+                arquivoHtml.WriteLine("<tr><div><img src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid)+ "\"></div><tr>");
+                arquivoHtml.WriteLine("<tr>"+isGrupo ? chat.Subject : chat.NomeContato +"<tr>");
+
+                
+
+                arquivoHtml.WriteLine("<div>");
                 arquivoHtml.WriteLine(chat.NomeContato);
                 if (chat.Mensagens.Any())
                     arquivoHtml.WriteLine(" - Última mensagem: " + chat.Mensagens.Last().Timestamp);
 
-                arquivoHtml.WriteLine("</h3>");
+                arquivoHtml.WriteLine("</div>");
 
 
                 arquivoHtml.WriteLine("<div>");
@@ -123,9 +145,14 @@ namespace WAReporter
                 }
 
                 arquivoHtml.WriteLine("</div></div>");
+
+                arquivoHtml.WriteLine("</tr>");
             }
 
-            arquivoHtml.WriteLine("</div>");
+            //arquivoHtml.WriteLine("</div>");
+
+            arquivoHtml.WriteLine("</table>");
+
 
             arquivoHtml.WriteLine("</body>");
             arquivoHtml.WriteLine("</html>");

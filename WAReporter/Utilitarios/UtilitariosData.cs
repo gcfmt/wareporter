@@ -10,9 +10,8 @@ namespace WAReporter.Utilitarios
     {
         public static DateTime TimeStampParaDateTime(this Int64 timestampSqlite)
         {
-            DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            dtDateTime = dtDateTime.AddSeconds(timestampSqlite/100).ToLocalTime();
-            return dtDateTime;
+
+            return new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Math.Round(timestampSqlite / 1000d)).ToLocalTime();
         }
     }
 }

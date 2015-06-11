@@ -238,7 +238,21 @@ namespace WAReporter
 
                     foreach (var chat in Chats)
                     {
+                        chat.NomeContato = "";
                         var waContact = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid);
+                        bool isGrupo = chat.KeyRemoteJid.Contains("-");
+                        if(!isGrupo)
+                        {
+                            var nomeExibido = waContact.DisplayName;
+                            var nomeWa = waContact.WaName;
+                            var telefone = waContact.WaName;
+
+
+                            chat.NomeContato += !String.IsNullOrWhiteSpace(nomeExibido) && !String.IsNullOrWhiteSpace(nomeWa) ? 
+                                                nomeExibido + ", "+nomeWa : nomeExibido + nomeWa;
+                            if (String.IsNullOrWhiteSpace(chat.NomeContato)) chat.NomeContato += waContact;
+                        }
+
                         chat.NomeContato = waContact != null ? String.IsNullOrWhiteSpace(waContact.DisplayName) ? waContact.WaName : waContact.DisplayName : "";
                     }
                     #endregion
