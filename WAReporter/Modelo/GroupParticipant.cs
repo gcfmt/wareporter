@@ -15,5 +15,7 @@ namespace WAReporter.Modelo
         public String Jid { get; set; }
         public int Admin { get; set; }
         public int Pending { get; set; }
+
+        public WaContact Contato { get; set; }
     }
 }

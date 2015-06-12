@@ -82,6 +82,13 @@ namespace WAReporter
                     groupParticipant.Pending = groupParticipantReader.IsDBNull(4) ? -1 : groupParticipantReader.GetInt32(4);
 
                     GroupParticipants.Add(groupParticipant);
+
+                }
+                                
+                foreach (var chat in Chats.Where(p => p.KeyRemoteJid.Contains("-")))
+                {
+                    chat.ParticipantesGrupo = new List<GroupParticipant>();
+                    chat.ParticipantesGrupo.AddRange(GroupParticipants.Where(p => p.Gjid == chat.KeyRemoteJid));
                 }
                 #endregion
 
@@ -233,28 +240,25 @@ namespace WAReporter
                         waContact.SortName = waContactsReader.IsDBNull(17) ? "" : waContactsReader.GetString(17);
                         waContact.Callability = waContactsReader.IsDBNull(18) ? "" : waContactsReader.GetString(18);
 
-                        WaContacts.Add(waContact);
-                    }
-
-                    foreach (var chat in Chats)
-                    {
-                        chat.NomeContato = "";
-                        var waContact = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid);
-                        bool isGrupo = chat.KeyRemoteJid.Contains("-");
-                        if(!isGrupo)
+                        bool isGrupo = waContact.Jid.Contains("-");
+                        if (!isGrupo)
                         {
                             var nomeExibido = waContact.DisplayName;
                             var nomeWa = waContact.WaName;
                             var telefone = waContact.WaName;
 
-
-                            chat.NomeContato += !String.IsNullOrWhiteSpace(nomeExibido) && !String.IsNullOrWhiteSpace(nomeWa) ? 
-                                                nomeExibido + ", "+nomeWa : nomeExibido + nomeWa;
-                            if (String.IsNullOrWhiteSpace(chat.NomeContato)) chat.NomeContato += waContact;
+                            waContact.NomeContato += !String.IsNullOrWhiteSpace(nomeExibido) && !String.IsNullOrWhiteSpace(nomeWa) ?
+                                                nomeExibido + ", " + nomeWa : nomeExibido + nomeWa;
+                            if (String.IsNullOrWhiteSpace(waContact.NomeContato)) waContact.NomeContato += waContact;
                         }
+                        else waContact.NomeContato = waContact.DisplayName;
 
-                        chat.NomeContato = waContact != null ? String.IsNullOrWhiteSpace(waContact.DisplayName) ? waContact.WaName : waContact.DisplayName : "";
+                        WaContacts.Add(waContact);
                     }
+
+                    foreach (var chat in Chats) chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid);
+
+                    foreach (var groupParticipant in GroupParticipants) groupParticipant.Contato = WaContacts.FirstOrDefault(p => p.Jid == groupParticipant.Jid);
                     #endregion
 
                     ConexaoWaDb.Close();

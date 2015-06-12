@@ -21,7 +21,10 @@ namespace WAReporter.Modelo
         public int? SortTimestamp { get; set; }
         public int? ModTag { get; set; }
 
-        public String NomeContato { get; set; }
+        public WaContact Contato { get; set; }
         public List<Message> Mensagens { get; set; }
+        public List<GroupParticipant> ParticipantesGrupo { get; set; }
+
+
     }
 }
