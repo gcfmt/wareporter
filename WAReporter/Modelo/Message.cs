@@ -22,9 +22,9 @@ namespace WAReporter.Modelo
         public String MediaCaption { get; set; }
         public String MediaHash { get; set; }
         public int MediaDuration { get; set; }
-        public int Origin{ get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public double Origin{ get; set; }
+        public String Latitude { get; set; }
+        public String Longitude { get; set; }
         public String ThumbImage { get; set; }
         public String RemoteResource { get; set; }
         public DateTime ReceivedTimestamp { get; set; }

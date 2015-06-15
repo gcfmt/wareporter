@@ -130,38 +130,47 @@ namespace WAReporter
                 while (messagesReader.Read())
                 {
                     var message = new Message();
-                    message.Id = messagesReader.GetInt32(0);
-                    message.KeyRemoteJid = messagesReader.GetString(1);
-                    message.KeyFromMe = messagesReader.IsDBNull(2) ? -1 : messagesReader.GetInt32(2);
-                    message.KeyId = messagesReader.GetString(3);
-                    message.Status = messagesReader.IsDBNull(4) ? -1 : messagesReader.GetInt32(4);
-                    message.NeedsPush = messagesReader.IsDBNull(5) ? -1 : messagesReader.GetInt32(5);
-                    message.Data = messagesReader.IsDBNull(6) ? "" : messagesReader.GetString(6);
-                    message.Timestamp = messagesReader.IsDBNull(7) ? DateTime.MinValue : messagesReader.GetInt64(7).TimeStampParaDateTime();
-                    message.MediaUrl = messagesReader.IsDBNull(8) ? "" : messagesReader.GetString(8);
-                    message.MediaMimeType = messagesReader.IsDBNull(9) ? "" : messagesReader.GetString(9);
-                    message.MediaWaType = messagesReader.IsDBNull(10) ? MediaWhatsappType.MEDIA_WHATSAPP_TEXT :
-                        (MediaWhatsappType) Enum.Parse(typeof(MediaWhatsappType), messagesReader.GetString(10));
-                    message.MediaSize = messagesReader.IsDBNull(11) ? -1 : messagesReader.GetInt32(11);
-                    message.MediaName = messagesReader.IsDBNull(12) ? "" : messagesReader.GetString(12);
-                    message.MediaCaption = messagesReader.IsDBNull(13) ? "" : messagesReader.GetString(13);
-                    message.MediaHash = messagesReader.IsDBNull(14) ? "" : messagesReader.GetString(14);
-                    message.MediaDuration = messagesReader.IsDBNull(15) ? -1 : messagesReader.GetInt32(15);
-                    message.Origin = messagesReader.IsDBNull(16) ? -1 : messagesReader.GetInt32(16);
-                    message.Latitude = messagesReader.IsDBNull(17) ? -1 : messagesReader.GetDouble(17);
-                    message.Longitude = messagesReader.IsDBNull(18) ? -1 : messagesReader.GetDouble(18);
-                    message.ThumbImage = messagesReader.IsDBNull(19) ? "" : messagesReader.GetString(19);
-                    message.RemoteResource = messagesReader.IsDBNull(20) ? "" : messagesReader.GetString(20);
-                    message.ReceivedTimestamp = messagesReader.IsDBNull(21) ? DateTime.MinValue : messagesReader.GetInt64(21).TimeStampParaDateTime();
-                    message.SendTimestamp = messagesReader.IsDBNull(22) ? DateTime.MinValue : messagesReader.GetInt64(22).TimeStampParaDateTime();
-                    message.ReceiptServerTimestamp = messagesReader.IsDBNull(23) ? DateTime.MinValue : messagesReader.GetInt64(23).TimeStampParaDateTime();
-                    message.ReceiptDeviceTimestamp = messagesReader.IsDBNull(24) ? DateTime.MinValue : messagesReader.GetInt64(24).TimeStampParaDateTime();
-                    message.ReadDeviceTimestamp = messagesReader.IsDBNull(25) ? DateTime.MinValue : messagesReader.GetInt64(25).TimeStampParaDateTime();
-                    message.PlayedDeviceTimestamp = messagesReader.IsDBNull(26) ? DateTime.MinValue : messagesReader.GetInt64(26).TimeStampParaDateTime();
-                    message.RecipientCount = messagesReader.IsDBNull(28) ? -1 : messagesReader.GetInt32(28);
-                    message.ParticipantHash = messagesReader.IsDBNull(29) ? "" : messagesReader.GetString(29);
+                    message.Id = messagesReader.GetInt32(messagesReader.GetOrdinal("_id"));
+                    if (message.Id == 1) continue;
+                    message.KeyRemoteJid = messagesReader.GetString(messagesReader.GetOrdinal("key_remote_jid"));
+                    message.KeyFromMe = messagesReader.IsDBNull(messagesReader.GetOrdinal("key_from_me")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("key_from_me"));
+                    message.KeyId = messagesReader.GetString(messagesReader.GetOrdinal("key_id"));
+                    message.Status = messagesReader.IsDBNull(messagesReader.GetOrdinal("status")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("status"));
+                    message.NeedsPush = messagesReader.IsDBNull(messagesReader.GetOrdinal("needs_push")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("needs_push"));
+                    message.Data = messagesReader.IsDBNull(messagesReader.GetOrdinal("data")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("data"));
+                    message.Timestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("timestamp")).TimeStampParaDateTime();
+                    message.MediaUrl = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_url")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_url"));
+                    message.MediaMimeType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_mime_type")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_mime_type"));
+                    message.MediaWaType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_wa_type")) ? MediaWhatsappType.MEDIA_WHATSAPP_TEXT :
+                        (MediaWhatsappType) Enum.Parse(typeof(MediaWhatsappType), messagesReader.GetString(messagesReader.GetOrdinal("media_wa_type")));
+                    message.MediaSize = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_size")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_size"));
+                    message.MediaName = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_name")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_name"));
+                    message.MediaHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_hash"));
+                    message.MediaCaption = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_caption")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_caption"));
 
-                    if(!messagesReader.IsDBNull(27))
+                    message.MediaDuration = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_duration")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_duration"));
+
+                    message.Origin = messagesReader.IsDBNull(messagesReader.GetOrdinal("origin")) ? -1 : messagesReader.GetDouble(messagesReader.GetOrdinal("origin"));
+                    message.Latitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("latitude")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("latitude")).ToString();
+                    message.Longitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("longitude")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("longitude")).ToString();
+                    message.ThumbImage = messagesReader.IsDBNull(messagesReader.GetOrdinal("thumb_image")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("thumb_image"));
+
+
+                    message.RemoteResource = messagesReader.IsDBNull(messagesReader.GetOrdinal("remote_resource")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("remote_resource"));
+                    message.ReceivedTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("received_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("received_timestamp")).TimeStampParaDateTime();
+                    message.SendTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("send_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("send_timestamp")).TimeStampParaDateTime();
+                    message.ReceiptServerTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_server_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_server_timestamp")).TimeStampParaDateTime();
+                 //   var val = messagesReader.GetValue(24);
+                  //  var v2 = val.GetType();
+
+                    message.ReceiptDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_device_timestamp")).TimeStampParaDateTime();
+                    message.ReadDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("read_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("read_device_timestamp")).TimeStampParaDateTime();
+                    message.PlayedDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("played_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("played_device_timestamp")).TimeStampParaDateTime();
+                    message.RecipientCount = messagesReader.IsDBNull(messagesReader.GetOrdinal("recipient_count")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("recipient_count"));
+                    message.ParticipantHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("participant_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("participant_hash"));
+
+
+                    if (!messagesReader.IsDBNull(messagesReader.GetOrdinal("raw_data")))
                     {
                         const int CHUNK_SIZE = 2 * 1024;
                         byte[] buffer = new byte[CHUNK_SIZE];
@@ -169,7 +178,7 @@ namespace WAReporter
                         long fieldOffset = 0;
                         using (MemoryStream stream = new MemoryStream())
                         {
-                            while ((bytesRead = messagesReader.GetBytes(27, fieldOffset, buffer, 0, buffer.Length)) > 0)
+                            while ((bytesRead = messagesReader.GetBytes(messagesReader.GetOrdinal("raw_data"), fieldOffset, buffer, 0, buffer.Length)) > 0)
                             {
                                 stream.Write(buffer, 0, (int)bytesRead);
                                 fieldOffset += bytesRead;
@@ -220,25 +229,25 @@ namespace WAReporter
                     while (waContactsReader.Read())
                     {
                         var waContact = new WaContact();
-                        waContact.Id = waContactsReader.GetInt32(0);
-                        waContact.Jid = waContactsReader.GetString(1);
-                        waContact.IsWhatsappUser = waContactsReader.GetBoolean(2);
-                        waContact.Status = waContactsReader.IsDBNull(3) ? "" : waContactsReader.GetString(3);
-                        waContact.StatusTimestamp = waContactsReader.IsDBNull(4) ? DateTime.MinValue : waContactsReader.GetInt64(4).TimeStampParaDateTime();
-                        waContact.Number = waContactsReader.IsDBNull(5) ? "" : waContactsReader.GetString(5);
-                        waContact.RawContactId = waContactsReader.IsDBNull(6) ? -1 : waContactsReader.GetInt32(6);
-                        waContact.DisplayName = waContactsReader.IsDBNull(7) ? "" : waContactsReader.GetString(7);
-                        waContact.PhoneType = waContactsReader.IsDBNull(8) ? -1 : waContactsReader.GetInt32(8);
-                        waContact.PhoneLabel = waContactsReader.IsDBNull(9) ? "" : waContactsReader.GetString(9);
-                        waContact.UnseenMsgCount = waContactsReader.IsDBNull(10) ? -1 : waContactsReader.GetInt32(10);
-                        waContact.PhotoTs = waContactsReader.IsDBNull(11) ? -1 : waContactsReader.GetInt64(11);
-                        waContact.ThumbTs = waContactsReader.IsDBNull(12) ? -1 : waContactsReader.GetInt64(12);
-                        waContact.PhotoIdTimestamp = waContactsReader.IsDBNull(13) ? DateTime.MinValue : waContactsReader.GetInt64(13).TimeStampParaDateTime();
-                        waContact.GivenName = waContactsReader.IsDBNull(14) ? "" : waContactsReader.GetString(14);
-                        waContact.FamilyName = waContactsReader.IsDBNull(15) ? "" : waContactsReader.GetString(15);
-                        waContact.WaName = waContactsReader.IsDBNull(16) ? "" : waContactsReader.GetString(16);
-                        waContact.SortName = waContactsReader.IsDBNull(17) ? "" : waContactsReader.GetString(17);
-                        waContact.Callability = waContactsReader.IsDBNull(18) ? "" : waContactsReader.GetString(18);
+                        waContact.Id = waContactsReader.GetInt32(waContactsReader.GetOrdinal("_id"));
+                        waContact.Jid = waContactsReader.GetString(waContactsReader.GetOrdinal("jid"));
+                        waContact.IsWhatsappUser = waContactsReader.GetBoolean(waContactsReader.GetOrdinal("is_whatsapp_user"));
+                        waContact.Status = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("status")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("status"));
+                        waContact.StatusTimestamp = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("status_timestamp")) ? DateTime.MinValue : waContactsReader.GetInt64(waContactsReader.GetOrdinal("status_timestamp")).TimeStampParaDateTime();
+                        waContact.Number = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("number")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("number"));
+                        waContact.RawContactId = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("raw_contact_id")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("raw_contact_id"));
+                        waContact.DisplayName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("display_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("display_name"));
+                        waContact.PhoneType = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_type")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("phone_type"));
+                        waContact.PhoneLabel = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_label")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("phone_label"));
+                        waContact.UnseenMsgCount = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("unseen_msg_count")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("unseen_msg_count"));
+                        waContact.PhotoTs = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("photo_ts")) ? -1 : waContactsReader.GetInt64(waContactsReader.GetOrdinal("photo_ts"));
+                        waContact.ThumbTs = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("thumb_ts")) ? -1 : waContactsReader.GetInt64(waContactsReader.GetOrdinal("thumb_ts"));
+                        waContact.PhotoIdTimestamp = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("photo_id_timestamp")) ? DateTime.MinValue : waContactsReader.GetInt64(waContactsReader.GetOrdinal("photo_id_timestamp")).TimeStampParaDateTime();
+                        waContact.GivenName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("given_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("given_name"));
+                        waContact.FamilyName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("family_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("family_name"));
+                        waContact.WaName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("wa_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("wa_name"));
+                        waContact.SortName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("sort_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("sort_name"));
+                        waContact.Callability = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("callability")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("callability"));
 
                         bool isGrupo = waContact.Jid.Contains("-");
                         if (!isGrupo)
@@ -265,7 +274,7 @@ namespace WAReporter
 
                     resultado = "SUCESSO: Bancos de Dados Carregados.";
                 }
-            } catch (Exception ex)
+            } catch (ArgumentNullException ex)
             {
                 resultado = "ERRO: "+ex.Message;
             }
