@@ -44,7 +44,7 @@
         </DataGrid>
         <StackPanel Orientation="Horizontal" Margin="5" x:Name="selecaoChatsStackPanel">
             <Button x:Name="selecionarTodosButton" Margin="0,0,5,0" Content="Selecionar Todos" Click="selecionarTodosButton_Click"/>
-            <Button x:Name="selecionarNenhumButton" Margin="0,0,5,0" Content="Selecionar Nenhum"/>
+            <Button x:Name="selecionarNenhumButton" Margin="0,0,5,0" Content="Selecionar Nenhum" Click="selecionarNenhumButton_Click"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Margin="5" x:Name="acoesChatsStackPanel">
             <Button x:Name="gerarRelatorioButton" Margin="0,0,5,0" Content="Gerar Relatório" Click="gerarRelatorioButton_Click"/>

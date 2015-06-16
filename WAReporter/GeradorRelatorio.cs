@@ -136,14 +136,7 @@ namespace WAReporter
 
                     arquivoHtml.WriteLine("<tr>");
 
-                    //arquivoHtml.WriteLine(".incoming_message { text-align: left; }");
-                    //arquivoHtml.WriteLine(".incoming_message > .text > span { background-color: #CCD9FF; }");
-                    //arquivoHtml.WriteLine(".outgoing_message { text-align: right; margin-left: auto; }");
-                    //arquivoHtml.WriteLine(".outgoing_message > .text > span { background-color: #BAE691; }");
-
                     arquivoHtml.WriteLine("<td style=\"text-align:" + (mensagem.KeyFromMe == 1 ? "right" : "left") + "; valign=bottom;  \">");
-
-                    
 
                     switch (mensagem.MediaWaType)
                     {
@@ -160,12 +153,12 @@ namespace WAReporter
                         break;
                         case MediaWhatsappType.MEDIA_WHATSAPP_AUDIO:
                         {
-                            arquivoHtml.WriteLine("<div><audio width=\"480\" controls><source src=\""+ Midia.ObterAudioDaMensagem(mensagem) + "\">Seu navegador não suporta áudio HTML5.</audio>");
+                            arquivoHtml.WriteLine("<div>"+Midia.ObterAudioDaMensagem(mensagem));
                         }
                         break;
                         case MediaWhatsappType.MEDIA_WHATSAPP_VIDEO:
                         {
-                            arquivoHtml.WriteLine("<div><video width=\"480\" controls><source src=\""+ Midia.ObterVideoDaMensagem(mensagem) + "\">Seu navegador não suporta vídeo HTML5.</video>");
+                            arquivoHtml.WriteLine("<div>"+Midia.ObterVideoDaMensagem(mensagem));
                         }
                         break;
                         case MediaWhatsappType.MEDIA_WHATSAPP_CONTACT:

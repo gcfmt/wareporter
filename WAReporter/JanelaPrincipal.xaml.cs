@@ -10,9 +10,6 @@ using WAReporter.Modelo;
 
 namespace WAReporter
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class JanelaPrincipal : Window
     {
         private string CaminhoMsgStoreDb = "";
@@ -68,10 +65,7 @@ namespace WAReporter
         private void selecionarTodosButton_Click(object sender, RoutedEventArgs e)
         {
             foreach(var itemDataGrid in ItensDataGrid)
-            {
                 itemDataGrid.IsSelecionado = true;
-            }
-            contatosDataGrid.UpdateLayout();
         }
 
         private void gerarRelatorioButton_Click(object sender, RoutedEventArgs e)
@@ -86,6 +80,12 @@ namespace WAReporter
             
             var caminhoRelatorio = Path.Combine(Path.GetDirectoryName(CaminhoMsgStoreDb), "WhatsApp - Relatório.html");
             var resultado = GeradorRelatorio.GerarRelatorioHtml(itensSelecionados.Select(p => p.ChatItem).ToList(), caminhoRelatorio);
+        }
+
+        private void selecionarNenhumButton_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var itemDataGrid in ItensDataGrid)
+                itemDataGrid.IsSelecionado = false;
         }
     }
 
@@ -103,7 +103,7 @@ namespace WAReporter
             {
                 isSelecionado = value;
                 if (PropertyChanged != null)
-                    PropertyChanged(this, new PropertyChangedEventArgs("Text"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("IsSelecionado"));
             }
         }
 

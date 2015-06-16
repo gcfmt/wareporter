@@ -73,36 +73,36 @@ namespace WAReporter
 
         public static string ObterAudioDaMensagem(Message mensagem)
         {
-            var dataPesquisa = mensagem.ReceivedTimestamp.Date;
+            var dataPesquisa = mensagem.Timestamp.Date;
             while(dataPesquisa < DateTime.Today)
             {
                 foreach(var audio in CaminhoAudios.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
                 {
                     var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
                     if (fi.Length == mensagem.MediaSize)
-                        return audio;
+                        return "<audio width =\"480\" controls><source src=\"" + audio + "\">Seu navegador não suporta áudio HTML5.</audio>";
                 }
                 dataPesquisa = dataPesquisa.AddDays(1);
             }
 
-            return "";
+            return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE ÁUDIO AUSENTE</span>";
         }
 
         public static string ObterVideoDaMensagem(Message mensagem)
         {
-            var dataPesquisa = mensagem.ReceivedTimestamp.Date;
+            var dataPesquisa = mensagem.Timestamp.Date;
             while (dataPesquisa < DateTime.Today)
             {
-                foreach (var audio in CaminhoVideos.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
+                foreach (var video in CaminhoVideos.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
                 {
-                    var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
+                    var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, video.Replace("..\\", "")));
                     if (fi.Length == mensagem.MediaSize)
-                        return audio;
+                        return "<video width =\"480\" controls><source src=\"" + video + "\">Seu navegador não suporta vídeo HTML5.</video>";
                 }
                 dataPesquisa = dataPesquisa.AddDays(1);
             }
 
-            return "";
+            return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE VÍDEO AUSENTE</span>";
         }
     }
 }
