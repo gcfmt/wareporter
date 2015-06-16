@@ -34,12 +34,12 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}" />
+                            <CheckBox IsChecked="{Binding Path=IsSelecionado, UpdateSourceTrigger=Default, Mode=TwoWay}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding Subject}" Width="60*" Header="Contato" IsReadOnly="True"/>
-                <DataGridTextColumn Binding="{Binding Creation}" Width="40*" Header="Última Mensagem" IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding NomeContato, Mode=TwoWay}" Width="60*" Header="Contato" IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding UltimaMensagem, Mode=TwoWay}" Width="40*" Header="Última Mensagem" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Orientation="Horizontal" Margin="5" x:Name="selecaoChatsStackPanel">

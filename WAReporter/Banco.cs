@@ -254,11 +254,11 @@ namespace WAReporter
                         {
                             var nomeExibido = waContact.DisplayName;
                             var nomeWa = waContact.WaName;
-                            var telefone = waContact.WaName;
+                            var telefone = waContact.Jid;
 
                             waContact.NomeContato += !String.IsNullOrWhiteSpace(nomeExibido) && !String.IsNullOrWhiteSpace(nomeWa) ?
                                                 nomeExibido + ", " + nomeWa : nomeExibido + nomeWa;
-                            if (String.IsNullOrWhiteSpace(waContact.NomeContato)) waContact.NomeContato += waContact;
+                            if (String.IsNullOrWhiteSpace(waContact.NomeContato)) waContact.NomeContato += waContact.Jid;
                         }
                         else waContact.NomeContato = waContact.DisplayName;
 
@@ -268,6 +268,8 @@ namespace WAReporter
                     foreach (var chat in Chats) chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid);
 
                     foreach (var groupParticipant in GroupParticipants) groupParticipant.Contato = WaContacts.FirstOrDefault(p => p.Jid == groupParticipant.Jid);
+
+                    foreach (var message in Messages) message.Contato = WaContacts.FirstOrDefault(p => p.Jid == message.RemoteResource);
                     #endregion
 
                     ConexaoWaDb.Close();

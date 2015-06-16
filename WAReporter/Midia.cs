@@ -15,15 +15,17 @@ namespace WAReporter
         public static List<String> CaminhoAudios { get; set; }
         public static List<String> CaminhoAvatares { get; set; }
         public static String CaminhoFotoPessoal { get; set; }
+        public static String CaminhoPastaWhatsApp { get; set; }
         public static Dictionary<String, String> PropriedadesUsuario { get; set; }
 
         public static string Procurar(string caminhoPastaWhatsApp)
         {
+            CaminhoPastaWhatsApp = caminhoPastaWhatsApp;
             var resultado = "";
             
             CaminhoImagens = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
             CaminhoVideos = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".mp4").ToList();
-            CaminhoAudios = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".aac").ToList();
+            CaminhoAudios = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".aac" || Path.GetExtension(p.Name) == ".m4a").ToList();
 
             var caminhoPastaFiles = "";
             if (Directory.Exists(Path.Combine(caminhoPastaWhatsApp, "f"))) caminhoPastaFiles = Path.Combine(caminhoPastaWhatsApp, "f");
@@ -69,6 +71,38 @@ namespace WAReporter
             return CaminhoAvatares.FirstOrDefault(p => p.Contains(Id)) ?? "";
         }
 
+        public static string ObterAudioDaMensagem(Message mensagem)
+        {
+            var dataPesquisa = mensagem.ReceivedTimestamp.Date;
+            while(dataPesquisa < DateTime.Today)
+            {
+                foreach(var audio in CaminhoAudios.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
+                {
+                    var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
+                    if (fi.Length == mensagem.MediaSize)
+                        return audio;
+                }
+                dataPesquisa = dataPesquisa.AddDays(1);
+            }
 
+            return "";
+        }
+
+        public static string ObterVideoDaMensagem(Message mensagem)
+        {
+            var dataPesquisa = mensagem.ReceivedTimestamp.Date;
+            while (dataPesquisa < DateTime.Today)
+            {
+                foreach (var audio in CaminhoVideos.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
+                {
+                    var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
+                    if (fi.Length == mensagem.MediaSize)
+                        return audio;
+                }
+                dataPesquisa = dataPesquisa.AddDays(1);
+            }
+
+            return "";
+        }
     }
 }

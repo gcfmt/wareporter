@@ -36,6 +36,7 @@ namespace WAReporter.Modelo
         public byte[] RawData { get; set; }
         public int RecipientCount { get; set; }
         public String ParticipantHash { get; set; }
+        public WaContact Contato { get; set; }
     }
 
     public enum MediaWhatsappType
