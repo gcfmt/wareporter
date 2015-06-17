@@ -265,11 +265,11 @@ namespace WAReporter
                         WaContacts.Add(waContact);
                     }
 
-                    foreach (var chat in Chats) chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid);
+                    foreach (var chat in Chats) chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid) ?? new WaContact { Jid = chat.KeyRemoteJid, NomeContato = chat.KeyRemoteJid.Contains("-")  ? chat.Subject : chat.KeyRemoteJid };
 
-                    foreach (var groupParticipant in GroupParticipants) groupParticipant.Contato = WaContacts.FirstOrDefault(p => p.Jid == groupParticipant.Jid);
+                    foreach (var groupParticipant in GroupParticipants) groupParticipant.Contato = WaContacts.FirstOrDefault(p => p.Jid == groupParticipant.Jid) ?? new WaContact { Jid = groupParticipant.Jid, NomeContato = groupParticipant.Jid };
 
-                    foreach (var message in Messages) message.Contato = WaContacts.FirstOrDefault(p => p.Jid == message.RemoteResource);
+                    foreach (var message in Messages) message.Contato = WaContacts.FirstOrDefault(p => p.Jid == message.RemoteResource) ?? new WaContact { Jid = message.RemoteResource, NomeContato = message.RemoteResource };
                     #endregion
 
                     ConexaoWaDb.Close();

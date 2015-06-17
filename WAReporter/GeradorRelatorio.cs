@@ -54,7 +54,7 @@ namespace WAReporter
 
             #region Chats
             arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Chats (Conversações)<h3>");
-            arquivoHtml.WriteLine("<table  style=\"font-size:13px; margin-bottom:20px;\">");
+            arquivoHtml.WriteLine("<table  style=\"font-size:13px; margin-bottom:100px;\">");
             arquivoHtml.WriteLine("<tr>");
             arquivoHtml.WriteLine("<th>ID</th>");
             arquivoHtml.WriteLine("<th colspan=2>Conversação</th>");      
@@ -82,14 +82,22 @@ namespace WAReporter
             #endregion
 
             #region Participantes de Grupos
-            arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Participantes de Grupos<h3>");
             foreach (var chat in chats.Where(p => p.KeyRemoteJid.Contains("-")).OrderByDescending(p => p.Mensagens.Last().Timestamp))
             {
-                arquivoHtml.WriteLine("<a name=\"partic-"+chat.KeyRemoteJid+"\"></a>");
-                arquivoHtml.WriteLine("<h4 style=\"text-align:center\">" + chat.Subject + "<h4>");
-                arquivoHtml.WriteLine("<h5 style=\"text-align:center\"><a href=\"#\">Ir para o topo</a><h5>");
+                //arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Participantes do Grupo<h3>");
+                arquivoHtml.WriteLine("<a name=\"partic-" + chat.KeyRemoteJid + "\"></a>");
 
-                arquivoHtml.WriteLine("<table style=\"margin-bottom:50px;\">");
+                arquivoHtml.WriteLine("<table style=\"margin-bottom:0px; width:70%; font-size:16px; background:white\">");
+                arquivoHtml.WriteLine("<tr style=\"background:white\">");
+                arquivoHtml.WriteLine("<td style=\"text-align: left, valign=center, background:white\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
+                arquivoHtml.WriteLine("<span>" + chat.Subject + "</span></td>");
+                arquivoHtml.WriteLine("<td style=\"font-weight:bold\"><b>Participantes do Grupo</b></td>");
+                arquivoHtml.WriteLine("<td colspan=2 style=\"text-align: right\"><a href=\"#\">Ir para o topo</a></td>");
+                arquivoHtml.WriteLine("</tr>");
+                arquivoHtml.WriteLine("</table>");
+                                
+                arquivoHtml.WriteLine("<table style=\"margin-bottom:50px;font-size:13px;\">");
+                
                 arquivoHtml.WriteLine("<tr>");
                 arquivoHtml.WriteLine("<th>ID</th>");
                 arquivoHtml.WriteLine("<th>Contato</th>");
@@ -120,14 +128,23 @@ namespace WAReporter
             arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Mensagens<h3>");
             foreach (var chat in chats.OrderByDescending(p => p.Mensagens.Last().Timestamp))
             {
-                arquivoHtml.WriteLine("<div style=\"text-align:center\">");
+              
+                arquivoHtml.WriteLine("<table style=\"margin-bottom:0px; width:70%; font-size:16px; background:#FFFFFF\">");
                 arquivoHtml.WriteLine("<a name=\"msg-" + chat.KeyRemoteJid + "\"></a>");
-                arquivoHtml.WriteLine("<div font-size=14>" + chat.Contato.NomeContato + "</div>");
-                arquivoHtml.WriteLine("<a href=\"#\">Ir para o topo</a>");
-                arquivoHtml.WriteLine("</div>");
+                arquivoHtml.WriteLine("<tr style=\"background:white\">");
+                arquivoHtml.WriteLine("<td style=\"text-align: left,  valign=center, background:#FFFFFF\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
+                arquivoHtml.WriteLine("<span>" + chat.Contato.NomeContato + "</span></td>");
+                arquivoHtml.WriteLine("<td style=\"font-weight:bold\"><b>Mensagens</b></td>");
+                arquivoHtml.WriteLine("<td colspan=2 style=\"text-align: right\"><a href=\"#\">Ir para o topo</a></td>");
+                arquivoHtml.WriteLine("</tr>");
+                arquivoHtml.WriteLine("</table>");
+
+
 
                 arquivoHtml.WriteLine("<table style=\"margin-bottom:50px; width:70%; font-size:16px;\">");
+
                 
+
                 bool isGrupo = chat.KeyRemoteJid.Contains("-");
 
                 foreach (var mensagem in chat.Mensagens)
@@ -137,18 +154,25 @@ namespace WAReporter
                     arquivoHtml.WriteLine("<tr>");
 
                     arquivoHtml.WriteLine("<td style=\"text-align:" + (mensagem.KeyFromMe == 1 ? "right" : "left") + "; valign=bottom;  \">");
+                    arquivoHtml.WriteLine(mensagem.Id);
 
                     switch (mensagem.MediaWaType)
                     {
                         case MediaWhatsappType.MEDIA_WHATSAPP_TEXT:
                         {
                             arquivoHtml.WriteLine("<div style=\"float: left, bottom; margin-top:7px; margin-bottom:7px;\">");
-                            arquivoHtml.WriteLine("<span>"+mensagem.Data+ "</span>");
-                        }
-                        break;
+                            if(mensagem.MediaSize == 1)
+                                arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color:green\"> NOME DO GRUPO ALTERADO PARA " + mensagem.Data + "</span>");
+                            else if (!String.IsNullOrWhiteSpace(mensagem.Data))
+                                    arquivoHtml.WriteLine("<span>"+mensagem.Data+ "</span>");
+                            else
+                                    arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color:green\">" + mensagem.RemoteResource + " SAIU DO GRUPO</span>");
+
+                            }
+                            break;
                         case MediaWhatsappType.MEDIA_WHATSAPP_IMAGE:
                         {
-                            arquivoHtml.WriteLine("<div style=\"float: left, bottom; margin-top:7px; margin-bottom:7px;\"><img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") +"\" src=\"" + Midia.ObterImagemDaMensagem(mensagem) + "\">");
+                            arquivoHtml.WriteLine("<div style=\"float: left, bottom; margin-top:7px; margin-bottom:7px;\">"+Midia.ObterImagemDaMensagem(mensagem));
                         }
                         break;
                         case MediaWhatsappType.MEDIA_WHATSAPP_AUDIO:
@@ -171,6 +195,11 @@ namespace WAReporter
                             arquivoHtml.WriteLine("<span>[ Location: \"" + mensagem.Latitude + "; \""+ mensagem.Longitude + " ]</span>");
                         }
                         break;
+                        default:
+                            {
+                                var id = mensagem.Id;
+                            }
+                            break;
                     }
 
                     if(mensagem.KeyFromMe == 0 && isGrupo)

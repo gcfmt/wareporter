@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,10 +23,47 @@ namespace WAReporter
         {
             CaminhoPastaWhatsApp = caminhoPastaWhatsApp;
             var resultado = "";
+
+            var audiosAmr = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".amr");
+            foreach(var audioAmr in audiosAmr)
+            {
+                var startInfo = new ProcessStartInfo();
+                startInfo.Arguments = "-i \""+audioAmr+"\" -ar 22050 \""+audioAmr.Replace(".amr", ".mp3")+"\" -y";
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.CreateNoWindow = true;
+                startInfo.UseShellExecute = false;
+                var process = new Process();
+                process.StartInfo = startInfo;
+                startInfo.FileName = "C:\\ffmpeg\\bin\\ffmpeg.exe";
+                process.Start();
+            }
             
+            var arquivosVideo =  UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".mp4").ToList();
+            foreach(var arquivoVideo in arquivosVideo)
+            {
+                var arq = UtilitariosVideo.GetVideoMetadata("C:\\ffmpeg\\bin\\ffmpeg.exe", arquivoVideo);
+                var i = arq.IndexOf("Stream #0:0") + 24;
+                var j = arq.IndexOf("Stream #0:1");
+                if(!arq.Substring(i, j-i).Contains("h264"))
+                {
+
+                    var startInfo = new ProcessStartInfo();
+                    startInfo.Arguments = "-i \"" + arquivoVideo + "\" -an -vcodec libx264 -crf 23 \""+ arquivoVideo.Replace(".mp4", "_.mp4") + "\"";
+                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.CreateNoWindow = true;
+                    startInfo.UseShellExecute = false;
+                    var process = new Process();
+                    process.StartInfo = startInfo;
+                    startInfo.FileName = "C:\\ffmpeg\\bin\\ffmpeg.exe";
+                    process.Start();
+                }
+            }
+
+
+
             CaminhoImagens = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
             CaminhoVideos = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".mp4").ToList();
-            CaminhoAudios = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".aac" || Path.GetExtension(p.Name) == ".m4a").ToList();
+            CaminhoAudios = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".aac" || Path.GetExtension(p.Name) == ".m4a" || Path.GetExtension(p.Name) == ".mp3" || Path.GetExtension(p.Name) == ".amr").ToList();
 
             var caminhoPastaFiles = "";
             if (Directory.Exists(Path.Combine(caminhoPastaWhatsApp, "f"))) caminhoPastaFiles = Path.Combine(caminhoPastaWhatsApp, "f");
@@ -60,10 +98,11 @@ namespace WAReporter
             if (propriedadesImagemMensagem.Contains("IMG"))
             {
                 var nomeArquivoImagem = propriedadesImagemMensagem.Substring(propriedadesImagemMensagem.IndexOf("IMG"), 23);
-                return CaminhoImagens.FirstOrDefault(p => p.Contains(nomeArquivoImagem)) ?? "";
+                var caminho = CaminhoImagens.FirstOrDefault(p => p.Contains(nomeArquivoImagem));
+                    return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"" + caminho + "\">";
             }
             else                
-                return "data:image/jpg;base64,"+ Convert.ToBase64String(mensagem.RawData);
+                return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
         }
 
         public static String ObterAvatar(String Id)
@@ -80,7 +119,7 @@ namespace WAReporter
                 {
                     var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
                     if (fi.Length == mensagem.MediaSize)
-                        return "<audio width =\"480\" controls><source src=\"" + audio + "\">Seu navegador não suporta áudio HTML5.</audio>";
+                            return "<audio width=\"480\" controls><source src=\"" + audio.Replace(".amr", ".mp3") + "\">Seu navegador não suporta áudio HTML5.</audio>";
                 }
                 dataPesquisa = dataPesquisa.AddDays(1);
             }
@@ -97,7 +136,7 @@ namespace WAReporter
                 {
                     var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, video.Replace("..\\", "")));
                     if (fi.Length == mensagem.MediaSize)
-                        return "<video width =\"480\" controls><source src=\"" + video + "\">Seu navegador não suporta vídeo HTML5.</video>";
+                        return "<video width=\"480\" controls><source src=\"" + video + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
                 }
                 dataPesquisa = dataPesquisa.AddDays(1);
             }

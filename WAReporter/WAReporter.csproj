@@ -86,6 +86,7 @@
     <Compile Include="Midia.cs" />
     <Compile Include="Utilitarios\UtilitariosArquivo.cs" />
     <Compile Include="Utilitarios\UtilitariosData.cs" />
+    <Compile Include="Utilitarios\UtilitariosVideo.cs" />
     <Page Include="JanelaAbrirArquivo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
