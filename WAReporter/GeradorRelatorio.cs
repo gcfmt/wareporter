@@ -64,7 +64,7 @@ namespace WAReporter
             arquivoHtml.WriteLine("<th>Última Mensagem</th>");
             arquivoHtml.WriteLine("</tr>");
 
-            foreach (var chat in chats.OrderByDescending(p => p.Mensagens.Last().Timestamp))
+            foreach (var chat in chats.OrderByDescending(p => p.Mensagens.Any() ? p.Mensagens.Last().Timestamp : DateTime.MinValue))
             {
                 bool isGrupo = chat.KeyRemoteJid.Contains("-");
 
@@ -73,16 +73,16 @@ namespace WAReporter
                 arquivoHtml.WriteLine("<td><img style=\"width: 40px; height: 40px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\"></td>");
                 arquivoHtml.WriteLine("<td style=\"text-align: left\" width=\"350px\">"+chat.Contato.NomeContato + "</td>");
                 arquivoHtml.WriteLine("<td>" + (isGrupo ? "Grupo" : "Indivíduo") + "</td>");
-                arquivoHtml.WriteLine("<td style=\"text-align: right\">" + (isGrupo ? "<a href=\"#partic-" + chat.KeyRemoteJid + "\">"+(chat.ParticipantesGrupo.Count()-1).ToString()+"</a>" : "") + "</td>");
+                arquivoHtml.WriteLine("<td style=\"text-align: right\">" + (isGrupo ? "<a href=\"#partic-" + chat.KeyRemoteJid + "\">"+ (chat.ParticipantesGrupo.Any() ? (chat.ParticipantesGrupo.Count()-1).ToString() : "N/D") + "</a>" : "")+ "</td>");
                 arquivoHtml.WriteLine("<td style=\"text-align: right\"><a href=\"#msg-" + chat.KeyRemoteJid + "\">" + (isGrupo ? chat.Mensagens.Count - 1 : chat.Mensagens.Count) + "</a></td>");
-                arquivoHtml.WriteLine("<td>" + chat.Mensagens.Last().Timestamp + "</td>");
+                arquivoHtml.WriteLine("<td>" + (chat.Mensagens.Any() ? chat.Mensagens.Last().Timestamp.ToString() : "Nenhuma") + "</td>");
                 arquivoHtml.WriteLine("</tr>");
             }
             arquivoHtml.WriteLine("</table>");
             #endregion
 
             #region Participantes de Grupos
-            foreach (var chat in chats.Where(p => p.KeyRemoteJid.Contains("-")).OrderByDescending(p => p.Mensagens.Last().Timestamp))
+            foreach (var chat in chats.Where(p => p.KeyRemoteJid.Contains("-") && p.ParticipantesGrupo.Any()).OrderByDescending(p => p.Mensagens.Last().Timestamp))
             {
                 //arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Participantes do Grupo<h3>");
                 arquivoHtml.WriteLine("<a name=\"partic-" + chat.KeyRemoteJid + "\"></a>");
@@ -125,8 +125,7 @@ namespace WAReporter
 
 
             #region
-            arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Mensagens<h3>");
-            foreach (var chat in chats.OrderByDescending(p => p.Mensagens.Last().Timestamp))
+            foreach (var chat in chats.Where(p => p.Mensagens.Any()).OrderByDescending(p => p.Mensagens.Last().Timestamp))
             {
               
                 arquivoHtml.WriteLine("<table style=\"margin-bottom:0px; width:70%; font-size:16px; background:#FFFFFF\">");

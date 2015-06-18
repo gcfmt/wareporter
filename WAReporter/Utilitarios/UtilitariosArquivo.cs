@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace WAReporter.Utilitarios
 {
@@ -27,6 +29,47 @@ namespace WAReporter.Utilitarios
                 if (checarArquivo == null || checarArquivo(new FileInfo(arquivo)))
                     yield return arquivo;
             }
+        }
+
+        public static bool Descriptografar(string inputFile, string outputFile)
+        {
+            string password = @"346a23652a46392b4d73257c67317e352e3372482177652c"; // Your Key Here
+            
+            try
+            {
+                using (RijndaelManaged aes = new RijndaelManaged())
+                {
+                    byte[] key = ASCIIEncoding.UTF8.GetBytes(password);
+
+                    /* This is for demostrating purposes only. 
+                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
+                    byte[] IV = ASCIIEncoding.UTF8.GetBytes(password);
+
+                    using (FileStream fsCrypt = new FileStream(inputFile, FileMode.Open))
+                    {
+                        using (FileStream fsOut = new FileStream(outputFile, FileMode.Create))
+                        {
+                            using (ICryptoTransform decryptor = aes.CreateDecryptor(key, IV))
+                            {
+                                using (CryptoStream cs = new CryptoStream(fsCrypt, decryptor, CryptoStreamMode.Read))
+                                {
+                                    int data;
+                                    while ((data = cs.ReadByte()) != -1)
+                                    {
+                                        fsOut.WriteByte((byte)data);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

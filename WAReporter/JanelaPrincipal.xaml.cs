@@ -26,7 +26,7 @@ namespace WAReporter
             var janelaAbrirArquivo = new JanelaAbrirArquivo();
             janelaAbrirArquivo.SelecaoOk += delegate
             {
-                CaminhoMsgStoreDb = janelaAbrirArquivo.arquivoTextBox.Text;
+                CaminhoMsgStoreDb = janelaAbrirArquivo.arquivoTextBox.Text.Replace(".db.crypt", ".db");
                 CaminhoWaDb = janelaAbrirArquivo.waDbTextBox.Text;
                 var resultadoCarregamento = Banco.CarregarBanco(CaminhoMsgStoreDb, CaminhoWaDb);
                 if(resultadoCarregamento.StartsWith("ERRO"))

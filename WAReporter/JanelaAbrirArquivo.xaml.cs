@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WAReporter.Utilitarios;
 
 namespace WAReporter
 {
@@ -40,7 +42,7 @@ namespace WAReporter
 
             // Set filter for file extension and default file extension 
             dlg.DefaultExt = ".db";
-            dlg.Filter = "Bancos de dados SQLite | *.db";
+            dlg.Filter = "Bancos de dados SQLite|*.db|Bancos de dados Criptografados|*.crypt";
 
             var result = dlg.ShowDialog();
             
@@ -77,7 +79,36 @@ namespace WAReporter
 
                 SelecaoOk(null, null);
                 this.Close();
-            } else
+            } else if (File.Exists(arquivoTextBox.Text) && arquivoTextBox.Text.EndsWith("db.crypt"))
+            {
+                
+
+
+
+                if (!String.IsNullOrWhiteSpace(waDbTextBox.Text) && !File.Exists(waDbTextBox.Text))
+                {
+                    MessageBox.Show("Arquivo \"" + waDbTextBox.Text + "\" não encontrado. Insira um endereço válido ou mantenha o endereço em branco.");
+                    waDbTextBox.Focus();
+                    return;
+                }
+
+
+                var startInfo = new ProcessStartInfo();
+                startInfo.Arguments = "enc -d -aes-192-ecb -in \""+ arquivoTextBox.Text +"\" -out \""+ arquivoTextBox.Text.Replace("db.crypt", "db") + "\" -K 346a23652a46392b4d73257c67317e352e3372482177652c -iv 1";
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.CreateNoWindow = true;
+                startInfo.UseShellExecute = false;
+                var process = new Process();
+                process.StartInfo = startInfo;
+                startInfo.FileName = "C:\\openssl.exe";
+                process.Start();
+                process.WaitForExit();
+                
+                SelecaoOk(null, null);
+                this.Close();
+            }
+
+            else
                 MessageBox.Show("Arquivo \"" + arquivoTextBox.Text + "\" não encontrado.");
 
             arquivoButton.Focus();

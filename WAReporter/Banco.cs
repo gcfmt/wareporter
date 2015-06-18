@@ -34,7 +34,8 @@ namespace WAReporter
         public static String CarregarBanco(String enderecoMsgStore, String enderecoWaDb)
         {
             String resultado = "";
-            try {
+            try
+            {
                 ConexaoMsgStoreDb = new SQLiteConnection("Data Source=" + enderecoMsgStore + ";Version=3;");
 
                 PossuiWaDb = !String.IsNullOrWhiteSpace(enderecoWaDb);
@@ -59,7 +60,8 @@ namespace WAReporter
                     chat.SortTimestamp = chatListReader.IsDBNull(8) ? -1 : chatListReader.GetInt32(8);
                     chat.ModTag = chatListReader.IsDBNull(9) ? -1 : chatListReader.GetInt32(9);
 
-                    if (!String.IsNullOrWhiteSpace(chat.Subject)) {
+                    if (!String.IsNullOrWhiteSpace(chat.Subject))
+                    {
                         var s = chatListReader.GetValue(3);
 
 
@@ -71,20 +73,28 @@ namespace WAReporter
 
                 #region importa group_participants
                 GroupParticipants = new List<GroupParticipant>();
-                var groupParticipantReader = new SQLiteCommand("select * from group_participants;", ConexaoMsgStoreDb).ExecuteReader();
-                while (groupParticipantReader.Read())
+                try
                 {
-                    var groupParticipant = new GroupParticipant();
-                    groupParticipant.Id = groupParticipantReader.GetInt32(0);
-                    groupParticipant.Gjid = groupParticipantReader.GetString(1);
-                    groupParticipant.Jid = groupParticipantReader.GetString(2);
-                    groupParticipant.Admin = groupParticipantReader.IsDBNull(3) ? -1 : groupParticipantReader.GetInt32(3);
-                    groupParticipant.Pending = groupParticipantReader.IsDBNull(4) ? -1 : groupParticipantReader.GetInt32(4);
+                    var groupParticipantReader = new SQLiteCommand("select * from group_participants;", ConexaoMsgStoreDb).ExecuteReader();
+                    while (groupParticipantReader.Read())
+                    {
+                        var groupParticipant = new GroupParticipant();
+                        groupParticipant.Id = groupParticipantReader.GetInt32(0);
+                        groupParticipant.Gjid = groupParticipantReader.GetString(1);
+                        groupParticipant.Jid = groupParticipantReader.GetString(2);
+                        groupParticipant.Admin = groupParticipantReader.IsDBNull(3) ? -1 : groupParticipantReader.GetInt32(3);
+                        groupParticipant.Pending = groupParticipantReader.IsDBNull(4) ? -1 : groupParticipantReader.GetInt32(4);
 
-                    GroupParticipants.Add(groupParticipant);
+                        GroupParticipants.Add(groupParticipant);
 
+                    }
+                  
                 }
-                                
+                catch (Exception ex)
+                {
+                    if (!ex.Message.Contains("no such table")) throw ex;
+                }
+
                 foreach (var chat in Chats.Where(p => p.KeyRemoteJid.Contains("-")))
                 {
                     chat.ParticipantesGrupo = new List<GroupParticipant>();
@@ -93,35 +103,50 @@ namespace WAReporter
                 #endregion
 
                 #region importa group_participants_history
-                GroupParticipantHistories = new List<GroupParticipantHistory>();
-                var groupParticipantHistoriesReader = new SQLiteCommand("select * from group_participants_history;", ConexaoMsgStoreDb).ExecuteReader();
-                while (groupParticipantHistoriesReader.Read())
+                try
                 {
-                    var groupParticipantHistory = new GroupParticipantHistory();
-                    groupParticipantHistory.Id = groupParticipantHistoriesReader.GetInt32(0);
-                    groupParticipantHistory.Timestamp = groupParticipantHistoriesReader.IsDBNull(1) ? DateTime.MinValue : groupParticipantHistoriesReader.GetInt64(1).TimeStampParaDateTime();
-                    groupParticipantHistory.GJid = groupParticipantHistoriesReader.GetString(2);
-                    groupParticipantHistory.Jid = groupParticipantHistoriesReader.GetString(3);
-                    groupParticipantHistory.Action = groupParticipantHistoriesReader.IsDBNull(4) ? -1 : groupParticipantHistoriesReader.GetInt32(4);
-                    groupParticipantHistory.OldPhash = groupParticipantHistoriesReader.GetString(5);
-                    groupParticipantHistory.NewPhash = groupParticipantHistoriesReader.GetString(6);
+                    GroupParticipantHistories = new List<GroupParticipantHistory>();
+                    var groupParticipantHistoriesReader = new SQLiteCommand("select * from group_participants_history;", ConexaoMsgStoreDb).ExecuteReader();
+                    while (groupParticipantHistoriesReader.Read())
+                    {
+                        var groupParticipantHistory = new GroupParticipantHistory();
+                        groupParticipantHistory.Id = groupParticipantHistoriesReader.GetInt32(0);
+                        groupParticipantHistory.Timestamp = groupParticipantHistoriesReader.IsDBNull(1) ? DateTime.MinValue : groupParticipantHistoriesReader.GetInt64(1).TimeStampParaDateTime();
+                        groupParticipantHistory.GJid = groupParticipantHistoriesReader.GetString(2);
+                        groupParticipantHistory.Jid = groupParticipantHistoriesReader.GetString(3);
+                        groupParticipantHistory.Action = groupParticipantHistoriesReader.IsDBNull(4) ? -1 : groupParticipantHistoriesReader.GetInt32(4);
+                        groupParticipantHistory.OldPhash = groupParticipantHistoriesReader.GetString(5);
+                        groupParticipantHistory.NewPhash = groupParticipantHistoriesReader.GetString(6);
 
-                    GroupParticipantHistories.Add(groupParticipantHistory);
+                        GroupParticipantHistories.Add(groupParticipantHistory);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    if (!ex.Message.Contains("no such table")) throw ex;
                 }
                 #endregion
 
                 #region importa media_refs
-                MediaRefs = new List<MediaRef>();
-                var mediaRefsReader = new SQLiteCommand("select * from media_refs;", ConexaoMsgStoreDb).ExecuteReader();
-                while (mediaRefsReader.Read())
+                try
                 {
-                    var mediaRef = new MediaRef();
-                    mediaRef.Id = mediaRefsReader.GetInt32(0);
-                    mediaRef.Path = mediaRefsReader.GetString(1);
-                    mediaRef.RefCount = mediaRefsReader.IsDBNull(2) ? -1 : mediaRefsReader.GetInt32(2);
+                    MediaRefs = new List<MediaRef>();
+                    var mediaRefsReader = new SQLiteCommand("select * from media_refs;", ConexaoMsgStoreDb).ExecuteReader();
+                    while (mediaRefsReader.Read())
+                    {
+                        var mediaRef = new MediaRef();
+                        mediaRef.Id = mediaRefsReader.GetInt32(0);
+                        mediaRef.Path = mediaRefsReader.GetString(1);
+                        mediaRef.RefCount = mediaRefsReader.IsDBNull(2) ? -1 : mediaRefsReader.GetInt32(2);
 
-                    MediaRefs.Add(mediaRef);
+                        MediaRefs.Add(mediaRef);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    if (!ex.Message.Contains("no such table")) throw ex;
+                }                
                 #endregion
 
                 #region importa messages
@@ -142,7 +167,7 @@ namespace WAReporter
                     message.MediaUrl = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_url")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_url"));
                     message.MediaMimeType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_mime_type")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_mime_type"));
                     message.MediaWaType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_wa_type")) ? MediaWhatsappType.MEDIA_WHATSAPP_TEXT :
-                        (MediaWhatsappType) Enum.Parse(typeof(MediaWhatsappType), messagesReader.GetString(messagesReader.GetOrdinal("media_wa_type")));
+                        (MediaWhatsappType)Enum.Parse(typeof(MediaWhatsappType), messagesReader.GetString(messagesReader.GetOrdinal("media_wa_type")));
                     message.MediaSize = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_size")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_size"));
                     message.MediaName = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_name")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_name"));
                     message.MediaHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_hash"));
@@ -160,8 +185,8 @@ namespace WAReporter
                     message.ReceivedTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("received_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("received_timestamp")).TimeStampParaDateTime();
                     message.SendTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("send_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("send_timestamp")).TimeStampParaDateTime();
                     message.ReceiptServerTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_server_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_server_timestamp")).TimeStampParaDateTime();
-                 //   var val = messagesReader.GetValue(24);
-                  //  var v2 = val.GetType();
+                    //   var val = messagesReader.GetValue(24);
+                    //  var v2 = val.GetType();
 
                     message.ReceiptDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_device_timestamp")).TimeStampParaDateTime();
                     message.ReadDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("read_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("read_device_timestamp")).TimeStampParaDateTime();
@@ -190,41 +215,48 @@ namespace WAReporter
                     Messages.Add(message);
                 }
 
-                foreach(var chat in Chats)
+                foreach (var chat in Chats)
                 {
                     chat.Mensagens = new List<Message>();
                     chat.Mensagens.AddRange(Messages.Where(p => p.KeyRemoteJid == chat.KeyRemoteJid).OrderBy(p => p.Timestamp));
                 }
 
-                    
+
                 #endregion
 
                 #region importa receipt
-                Receipts = new List<Receipt>();
-                var receiptsReader = new SQLiteCommand("select * from receipts;", ConexaoMsgStoreDb).ExecuteReader();
-                while (receiptsReader.Read())
+                try
                 {
-                    var receipt = new Receipt();
-                    receipt.Id = receiptsReader.GetInt32(0);
-                    receipt.KeyRemoteJid = receiptsReader.GetString(1);
-                    receipt.KeyId = receiptsReader.GetString(2);
-                    receipt.RemoteResource = receiptsReader.GetString(3);
-                    receipt.ReceiptDeviceTimestamp = receiptsReader.IsDBNull(4) ? DateTime.MinValue : receiptsReader.GetInt64(4).TimeStampParaDateTime();
-                    receipt.ReadDeviceTimestamp = receiptsReader.IsDBNull(5) ? DateTime.MinValue : receiptsReader.GetInt64(5).TimeStampParaDateTime();
-                    receipt.PlayedDeviceTimestamp = receiptsReader.IsDBNull(6) ? DateTime.MinValue : receiptsReader.GetInt64(6).TimeStampParaDateTime();
+                    Receipts = new List<Receipt>();
+                    var receiptsReader = new SQLiteCommand("select * from receipts;", ConexaoMsgStoreDb).ExecuteReader();
+                    while (receiptsReader.Read())
+                    {
+                        var receipt = new Receipt();
+                        receipt.Id = receiptsReader.GetInt32(0);
+                        receipt.KeyRemoteJid = receiptsReader.GetString(1);
+                        receipt.KeyId = receiptsReader.GetString(2);
+                        receipt.RemoteResource = receiptsReader.GetString(3);
+                        receipt.ReceiptDeviceTimestamp = receiptsReader.IsDBNull(4) ? DateTime.MinValue : receiptsReader.GetInt64(4).TimeStampParaDateTime();
+                        receipt.ReadDeviceTimestamp = receiptsReader.IsDBNull(5) ? DateTime.MinValue : receiptsReader.GetInt64(5).TimeStampParaDateTime();
+                        receipt.PlayedDeviceTimestamp = receiptsReader.IsDBNull(6) ? DateTime.MinValue : receiptsReader.GetInt64(6).TimeStampParaDateTime();
 
-                    Receipts.Add(receipt);
+                        Receipts.Add(receipt);
+                    }
+                } catch (Exception ex)
+                {
+                    if (!ex.Message.Contains("no such table")) throw ex;
                 }
                 #endregion
 
                 ConexaoMsgStoreDb.Close();
 
+
+                WaContacts = new List<WaContact>();
                 if (PossuiWaDb)
                 {
                     ConexaoWaDb.Open();
 
                     #region importa wa_contacts
-                    WaContacts = new List<WaContact>();
                     var waContactsReader = new SQLiteCommand("select * from wa_contacts;", ConexaoWaDb).ExecuteReader();
                     while (waContactsReader.Read())
                     {
@@ -265,24 +297,29 @@ namespace WAReporter
                         WaContacts.Add(waContact);
                     }
 
-                    foreach (var chat in Chats) chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid) ?? new WaContact { Jid = chat.KeyRemoteJid, NomeContato = chat.KeyRemoteJid.Contains("-")  ? chat.Subject : chat.KeyRemoteJid };
-
-                    foreach (var groupParticipant in GroupParticipants) groupParticipant.Contato = WaContacts.FirstOrDefault(p => p.Jid == groupParticipant.Jid) ?? new WaContact { Jid = groupParticipant.Jid, NomeContato = groupParticipant.Jid };
-
-                    foreach (var message in Messages) message.Contato = WaContacts.FirstOrDefault(p => p.Jid == message.RemoteResource) ?? new WaContact { Jid = message.RemoteResource, NomeContato = message.RemoteResource };
+                   
                     #endregion
 
                     ConexaoWaDb.Close();
-
-                    resultado = "SUCESSO: Bancos de Dados Carregados.";
                 }
-            } catch (ArgumentNullException ex)
+
+                foreach (var chat in Chats) chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid) ?? new WaContact { Jid = chat.KeyRemoteJid, NomeContato = chat.KeyRemoteJid.Contains("-") ? chat.Subject : chat.KeyRemoteJid };
+
+                foreach (var groupParticipant in GroupParticipants) groupParticipant.Contato = WaContacts.FirstOrDefault(p => p.Jid == groupParticipant.Jid) ?? new WaContact { Jid = groupParticipant.Jid, NomeContato = groupParticipant.Jid };
+
+                foreach (var message in Messages) message.Contato = WaContacts.FirstOrDefault(p => p.Jid == message.RemoteResource) ?? new WaContact { Jid = message.RemoteResource, NomeContato = message.RemoteResource };
+
+
+                resultado = "SUCESSO: Bancos de Dados Carregados.";
+
+            }
+            catch (ArgumentNullException ex)
             {
-                resultado = "ERRO: "+ex.Message;
+                resultado = "ERRO: " + ex.Message;
             }
 
             return resultado;
-        }       
+        }
 
 
     }
