@@ -163,7 +163,7 @@ namespace WAReporter
                             if(mensagem.MediaSize == 1)
                                 arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color:green\"> NOME DO GRUPO ALTERADO PARA " + mensagem.Data + "</span>");
                             else if (!String.IsNullOrWhiteSpace(mensagem.Data))
-                                    arquivoHtml.WriteLine("<span>"+mensagem.Data+ "</span>");
+                                    arquivoHtml.WriteLine("<span>"+ Midia.AdicionaEmoji(mensagem.Data)+ "</span>");
                             else
                                     arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color:green\">" + mensagem.RemoteResource + " SAIU DO GRUPO</span>");
 
