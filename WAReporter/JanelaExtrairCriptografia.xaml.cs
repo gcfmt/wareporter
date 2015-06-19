@@ -42,7 +42,7 @@ namespace WAReporter
 
             // Set filter for file extension and default file extension 
             dlg.DefaultExt = ".crypt";
-            dlg.Filter = "Bancos de dados Criptografados|*.crypt|*.crypt5|*.crypt7|*.crypt8";
+            dlg.Filter = "All files (*.*)|*.*";
 
             var result = dlg.ShowDialog();
             
@@ -52,9 +52,9 @@ namespace WAReporter
                 // Open document 
                 arquivoTextBox.Text = dlg.FileName;
 
-                var pathWaDb = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dlg.FileName), "wa.db");
-                if (File.Exists(pathWaDb) && String.IsNullOrWhiteSpace(waDbTextBox.Text))
-                    waDbTextBox.Text = pathWaDb;
+                //var pathWaDb = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dlg.FileName), "wa.db");
+                //if (File.Exists(pathWaDb) && String.IsNullOrWhiteSpace(waDbTextBox.Text))
+                //    waDbTextBox.Text = pathWaDb;
             }
         }
 
@@ -86,7 +86,15 @@ namespace WAReporter
 
 
             //var arquivoTextBox.Text;
-            
+            //chave = 126 a 157
+            //< v2.12.38
+            //iv = 110 a 125
+                
+            //se > v2.12.38
+            //    iv = 51 a 66
+
+            //ambos strip 67 bytes do crypt8
+
 
             byte[] test = File.ReadAllBytes(crypt8TextBox.Text).Skip(125).Take(32).ToArray();
             byte[] iv = File.ReadAllBytes(crypt8TextBox.Text).Skip(109).Take(16).ToArray();
@@ -106,12 +114,7 @@ namespace WAReporter
                 
                 SelecaoOk(null, null);
                 this.Close();
-            }
-
-            else
-                MessageBox.Show("Arquivo \"" + arquivoTextBox.Text + "\" não encontrado.");
-
-            arquivoButton.Focus();
+        
         }
 
         private void CancelarButton_Click(object sender, RoutedEventArgs e)

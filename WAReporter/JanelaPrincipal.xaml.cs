@@ -54,7 +54,36 @@ namespace WAReporter
 
         private void ExtrairCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            var janelaExtrairCriptografia = new JanelaExtrairCriptografia();
+            janelaExtrairCriptografia.SelecaoOk += delegate
+            {
+                CaminhoMsgStoreDb = janelaExtrairCriptografia.arquivoTextBox.Text.Replace(".db.crypt", ".db");
+                //CaminhoWaDb = janelaExtrairCriptografia.waDbTextBox.Text;
+                var resultadoCarregamento = Banco.CarregarBanco(CaminhoMsgStoreDb, CaminhoWaDb);
+                if (resultadoCarregamento.StartsWith("ERRO"))
+                {
+                    MessageBox.Show(resultadoCarregamento);
+                }
+                else
+                {
+                    ItensDataGrid = new List<DataGridItem>();
+                    foreach (var chat in Banco.Chats)
+                        ItensDataGrid.Add(new DataGridItem
+                        {
+                            ChatItem = chat,
+                            NomeContato = chat.Contato.NomeContato + chat.Subject,
+                            UltimaMensagem = chat.Mensagens.Any() ? chat.Mensagens.Max(p => p.Timestamp).ToString() : "",
+                            IsSelecionado = false
+                        });
 
+
+                    contatosDataGrid.ItemsSource = ItensDataGrid;
+
+                    Midia.Procurar(Directory.GetParent(System.IO.Path.GetDirectoryName(janelaExtrairCriptografia.arquivoTextBox.Text)).FullName);
+
+                }
+            };
+            janelaExtrairCriptografia.ShowDialog();
         }
 
         private void SairCommand_Executed(object sender, ExecutedRoutedEventArgs e)

@@ -24,7 +24,7 @@
         <Menu>
             <MenuItem Header="Arquivo">
                 <MenuItem Header="Abrir" Command="{StaticResource Abrir}" InputGestureText="Ctrl+O"/>
-                <MenuItem Header="Extrair Criptografia" InputGestureText="Ctrl+E"/>
+                <MenuItem Header="Extrair Criptografia" Command="{StaticResource Extrair}" InputGestureText="Ctrl+E"/>
                 <Separator></Separator>
                 <MenuItem Header="Sair" Command="{StaticResource Sair}" InputGestureText="Alt+F4"/>
                 </MenuItem>
