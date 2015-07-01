@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WAReporter.Modelo;
+using WAReporter.Utilitarios;
 
 namespace WAReporter
 {
@@ -15,6 +16,15 @@ namespace WAReporter
         public static string GerarRelatorioHtml(List<Chat> chats, String caminhoHtml)
         {
             var resultado = "";
+
+
+            if (!Directory.Exists(Path.Combine(Path.GetDirectoryName(caminhoHtml), "data")))
+            {
+                var d = Path.Combine(Path.GetDirectoryName(caminhoHtml), "data");
+                UtilitariosArquivo.CopiarDiretorio(Path.Combine(Directory.GetCurrentDirectory(), "data"), Path.Combine(Path.GetDirectoryName(caminhoHtml), "data"));
+
+            }
+
 
             var arquivoHtml = new StreamWriter(caminhoHtml);
             arquivoHtml.WriteLine("<!DOCTYPE html>");
@@ -34,13 +44,12 @@ namespace WAReporter
             arquivoHtml.WriteLine(".message {  }");
             arquivoHtml.WriteLine(".message > .timestamp { font-family: \"Arial\", monospace; font-size: 8pt; }");
             arquivoHtml.WriteLine(".message > .text > span { }");
-            arquivoHtml.WriteLine("table { width: 70%;  margin: 0px auto; color: #333; font-size: 11; font-family: Helvetica, Arial, sans-serif; border-collapse: collapse;" +
-                "border-spacing: 0; }");
-            arquivoHtml.WriteLine("td, th { border: 1px solid transparent; }");
+            arquivoHtml.WriteLine("table { width: 70%; border: 1px solid black; margin: 0px auto; color: #333; font-size: 11; font-family: Helvetica, Arial, sans-serif; }");
+            //arquivoHtml.WriteLine("td, th { border: 1px solid transparent; }");
             arquivoHtml.WriteLine("th { background: #DFDFDF; font-weight: bold; }");
             arquivoHtml.WriteLine("td { background: #FAFAFA; text-align: center; }");
-            arquivoHtml.WriteLine("tr: nth-child(even) td { background: #BFE7EA; }");
-            arquivoHtml.WriteLine("tr: nth-child(odd) td { background: #F9FDFD; }");
+            //arquivoHtml.WriteLine("tr: nth-child(even) td { background: #BFE7EA; }");
+            //arquivoHtml.WriteLine("tr: nth-child(odd) td { background: #F9FDFD; }");
             arquivoHtml.WriteLine("</style>");
 
             arquivoHtml.WriteLine("</head>");
@@ -71,10 +80,10 @@ namespace WAReporter
                 arquivoHtml.WriteLine("<tr>");
                 arquivoHtml.WriteLine("<td style=\"text-align: left\">" + chat.KeyRemoteJid + "</td>");
                 arquivoHtml.WriteLine("<td><img style=\"width: 40px; height: 40px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\"></td>");
-                arquivoHtml.WriteLine("<td style=\"text-align: left\" width=\"350px\">"+chat.Contato.NomeContato + "</td>");
+                arquivoHtml.WriteLine("<td style=\"text-align: left\" width=\"350px\">"+ Midia.AdicionaEmoji(chat.Contato.NomeContato)  + "</td>");
                 arquivoHtml.WriteLine("<td>" + (isGrupo ? "Grupo" : "Indivíduo") + "</td>");
                 arquivoHtml.WriteLine("<td style=\"text-align: right\">" + (isGrupo ? "<a href=\"#partic-" + chat.KeyRemoteJid + "\">"+ (chat.ParticipantesGrupo.Any() ? (chat.ParticipantesGrupo.Count()-1).ToString() : "N/D") + "</a>" : "")+ "</td>");
-                arquivoHtml.WriteLine("<td style=\"text-align: right\"><a href=\"#msg-" + chat.KeyRemoteJid + "\">" + (isGrupo ? chat.Mensagens.Count - 1 : chat.Mensagens.Count) + "</a></td>");
+                arquivoHtml.WriteLine("<td style=\"text-align: right\"><a href=\"#msg-" + chat.KeyRemoteJid + "\">" + (isGrupo ? chat.Mensagens.Count - 2 : chat.Mensagens.Count) + "</a></td>");
                 arquivoHtml.WriteLine("<td>" + (chat.Mensagens.Any() ? chat.Mensagens.Last().Timestamp.ToString() : "Nenhuma") + "</td>");
                 arquivoHtml.WriteLine("</tr>");
             }
@@ -82,17 +91,17 @@ namespace WAReporter
             #endregion
 
             #region Participantes de Grupos
-            foreach (var chat in chats.Where(p => p.KeyRemoteJid.Contains("-") && p.ParticipantesGrupo.Any()).OrderByDescending(p => p.Mensagens.Last().Timestamp))
+            foreach (var chat in chats.Where(p => p.KeyRemoteJid.Contains("-") && p.ParticipantesGrupo.Any()).OrderByDescending(p => p.Mensagens.Any() ? p.Mensagens.Last().Timestamp : DateTime.MinValue))
             {
                 //arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Participantes do Grupo<h3>");
                 arquivoHtml.WriteLine("<a name=\"partic-" + chat.KeyRemoteJid + "\"></a>");
 
                 arquivoHtml.WriteLine("<table style=\"margin-bottom:0px; width:70%; font-size:16px; background:white\">");
                 arquivoHtml.WriteLine("<tr style=\"background:white\">");
-                arquivoHtml.WriteLine("<td style=\"text-align: left, valign=center, background:white\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
-                arquivoHtml.WriteLine("<span>" + chat.Subject + "</span></td>");
-                arquivoHtml.WriteLine("<td style=\"font-weight:bold\"><b>Participantes do Grupo</b></td>");
-                arquivoHtml.WriteLine("<td colspan=2 style=\"text-align: right\"><a href=\"#\">Ir para o topo</a></td>");
+                arquivoHtml.WriteLine("<th style=\"text-align: left, valign=center, background:white\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
+                arquivoHtml.WriteLine("<span>" + Midia.AdicionaEmoji(chat.Subject)  + "</span></td>");
+                arquivoHtml.WriteLine("<th style=\"font-weight:bold\"><b>Participantes do Grupo</b></td>");
+                arquivoHtml.WriteLine("<th colspan=2 style=\"text-align: right\"><a href=\"#\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a></td>");
                 arquivoHtml.WriteLine("</tr>");
                 arquivoHtml.WriteLine("</table>");
                                 
@@ -113,7 +122,7 @@ namespace WAReporter
                     arquivoHtml.WriteLine("<td><img style=\"width: 40px; height: 40px; \" src=\"" + Midia.ObterAvatar(participant.Jid) + "\"></td>");
 
                     arquivoHtml.WriteLine("<td style=\"text-align: left\" width=\"350px\">" + (participant.Contato != null ?
-                        participant.Contato.NomeContato : "") + "</td>");
+                        Midia.AdicionaEmoji(participant.Contato.NomeContato) : "") + "</td>");
 
                     arquivoHtml.WriteLine("<td>"+(participant.Admin == 1 ? "Administrador" : "" )+"</td>");
                     arquivoHtml.WriteLine("</tr>");                   
@@ -131,10 +140,10 @@ namespace WAReporter
                 arquivoHtml.WriteLine("<table style=\"margin-bottom:0px; width:70%; font-size:16px; background:#FFFFFF\">");
                 arquivoHtml.WriteLine("<a name=\"msg-" + chat.KeyRemoteJid + "\"></a>");
                 arquivoHtml.WriteLine("<tr style=\"background:white\">");
-                arquivoHtml.WriteLine("<td style=\"text-align: left,  valign=center, background:#FFFFFF\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
-                arquivoHtml.WriteLine("<span>" + chat.Contato.NomeContato + "</span></td>");
-                arquivoHtml.WriteLine("<td style=\"font-weight:bold\"><b>Mensagens</b></td>");
-                arquivoHtml.WriteLine("<td colspan=2 style=\"text-align: right\"><a href=\"#\">Ir para o topo</a></td>");
+                arquivoHtml.WriteLine("<th style=\"text-align: left,  valign=center, background:#FFFFFF\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
+                arquivoHtml.WriteLine("<span>" + Midia.AdicionaEmoji(chat.Contato.NomeContato) + "</span></th>");
+                arquivoHtml.WriteLine("<th style=\"font-weight:bold\"><b>Mensagens</b></th>");
+                arquivoHtml.WriteLine("<th colspan=2 style=\"text-align: right\"><a href=\"#\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a></td>");
                 arquivoHtml.WriteLine("</tr>");
                 arquivoHtml.WriteLine("</table>");
 
@@ -148,10 +157,10 @@ namespace WAReporter
 
                 foreach (var mensagem in chat.Mensagens)
                 {
-                    if (mensagem == chat.Mensagens.First() && isGrupo) continue;
+                    if ((mensagem == chat.Mensagens.ElementAt(0) || mensagem == chat.Mensagens.ElementAt(1)) && isGrupo) continue;
 
-                    arquivoHtml.WriteLine("<tr>");
-
+                    arquivoHtml.WriteLine("<tr>");                   
+                    
                     arquivoHtml.WriteLine("<td style=\"text-align:" + (mensagem.KeyFromMe == 1 ? "right" : "left") + "; valign=bottom;  \">");
                     arquivoHtml.WriteLine(mensagem.Id);
 
@@ -163,7 +172,7 @@ namespace WAReporter
                             if(mensagem.MediaSize == 1)
                                 arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color:green\"> NOME DO GRUPO ALTERADO PARA " + mensagem.Data + "</span>");
                             else if (!String.IsNullOrWhiteSpace(mensagem.Data))
-                                    arquivoHtml.WriteLine("<span>"+ Midia.AdicionaEmoji(mensagem.Data)+ "</span>");
+                                    arquivoHtml.WriteLine("<span "+ (mensagem.KeyFromMe == 1 ? "style=\"background-color: #d3edc6;\"" : "") + ">"+ Midia.AdicionaEmoji(mensagem.Data)+ "</span>");
                             else
                                     arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color:green\">" + mensagem.RemoteResource + " SAIU DO GRUPO</span>");
 
@@ -201,12 +210,18 @@ namespace WAReporter
                             break;
                     }
 
-                    if(mensagem.KeyFromMe == 0 && isGrupo)
-                        arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color: #663300\"><b>" + mensagem.Contato.NomeContato + "</b></span>");
+                    if(mensagem.KeyFromMe == 0)
+                        arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color: #663300\"><b>" + Midia.AdicionaEmoji(mensagem.Contato.NomeContato) + " </b></span>");
                     arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color: #001D72\"><b>" + mensagem.Timestamp + "</b></span>");
 
                     arquivoHtml.WriteLine("</div>");
 
+                    arquivoHtml.WriteLine("</td>");
+
+                    arquivoHtml.WriteLine("<td>");
+                    arquivoHtml.WriteLine("<a href=\"#msg-" + chat.KeyRemoteJid + "\"><img src=\"data/icon/angle-up.png\" title=\"Ir para o início do chat\" alt=\"\"/></a>");
+                    arquivoHtml.WriteLine("</td><td>");
+                    arquivoHtml.WriteLine("<a href=\"#\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a>");
                     arquivoHtml.WriteLine("</td>");
 
                     arquivoHtml.WriteLine("</tr>");

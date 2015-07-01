@@ -96,30 +96,77 @@ namespace WAReporter
             //ambos strip 67 bytes do crypt8
 
 
-            byte[] test = File.ReadAllBytes(crypt8TextBox.Text).Skip(125).Take(32).ToArray();
-            byte[] iv = File.ReadAllBytes(crypt8TextBox.Text).Skip(109).Take(16).ToArray();
-
+            byte[] key = File.ReadAllBytes(crypt8TextBox.Text).Skip(125).Take(32).ToArray();
+            byte[] iv = File.ReadAllBytes(crypt8TextBox.Text).Skip(110).Take(16).ToArray();
+            if (iv[0] == 0)
+                iv = File.ReadAllBytes(arquivoTextBox.Text).Skip(50).Take(16).ToArray();
+            var keyString = BitConverter.ToString(key).Replace("-","");
+            var ivString = BitConverter.ToString(iv).Replace("-", "");
 
 
             var startInfo = new ProcessStartInfo();
-                startInfo.Arguments = "enc -d -aes-192-ecb -in \""+ arquivoTextBox.Text +"\" -out \""+ arquivoTextBox.Text.Replace("db.crypt", "db") + "\" -K 346a23652a46392b4d73257c67317e352e3372482177652c -iv 1";
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.CreateNoWindow = true;
-                startInfo.UseShellExecute = false;
-                var process = new Process();
-                process.StartInfo = startInfo;
-                startInfo.FileName = "C:\\openssl.exe";
-                process.Start();
-                process.WaitForExit();
+            startInfo.Arguments = "enc -aes-256-cbc -d -nosalt -bufsize 16384 -in \""+arquivoTextBox.Text+ "\" -out \"" + arquivoTextBox.Text.Replace("db.crypt", "db") + "\" -K "+keyString+" -iv "+ivString;
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            var process = new Process();
+            process.StartInfo = startInfo;
+            startInfo.FileName = "C:\\openssl.exe";
+            process.Start();
+            process.WaitForExit();
                 
-                SelecaoOk(null, null);
-                this.Close();
+            SelecaoOk(null, null);
+            this.Close();
         
         }
 
         private void CancelarButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void crypt8Button_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".crypt8";
+            dlg.Filter = "All files (*.*)|*.*";
+
+            var result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                crypt8TextBox.Text = dlg.FileName;
+
+                //var pathWaDb = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dlg.FileName), "wa.db");
+                //if (File.Exists(pathWaDb) && String.IsNullOrWhiteSpace(waDbTextBox.Text))
+                //    waDbTextBox.Text = pathWaDb;
+            }
+        }
+
+        private void crypt7Button_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".crypt7";
+            dlg.Filter = "All files (*.*)|*.*";
+
+            var result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                crypt7TextBox.Text = dlg.FileName;
+
+                //var pathWaDb = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dlg.FileName), "wa.db");
+                //if (File.Exists(pathWaDb) && String.IsNullOrWhiteSpace(waDbTextBox.Text))
+                //    waDbTextBox.Text = pathWaDb;
+            }
         }
     }
 }

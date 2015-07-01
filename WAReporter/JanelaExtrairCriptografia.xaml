@@ -20,12 +20,12 @@
         <StackPanel Orientation="Horizontal"  Margin="5">
             <Label Content="key (crypt7):" Width="90"/>
             <TextBox x:Name="crypt7TextBox" Width="500"/>
-            <Button x:Name="crypt7Button" Content="..." Width="50"/>
+            <Button x:Name="crypt7Button" Content="..." Click="crypt7Button_Click" Width="50"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal"  Margin="5">
             <Label Content="key (crypt8):" Width="90"/>
             <TextBox x:Name="crypt8TextBox" Width="500"/>
-            <Button x:Name="crypt8Button" Content="..." Width="50"/>
+            <Button x:Name="crypt8Button" Content="..." Click="crypt8Button_Click" Width="50"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="3,10,23,5">
             <Button x:Name="OkButton" Click="OkButton_Click" Margin="5,0" Height="28" Content="Ok" Width="70"/>

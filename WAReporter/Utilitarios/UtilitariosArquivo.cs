@@ -31,6 +31,27 @@ namespace WAReporter.Utilitarios
             }
         }
 
+
+        public static void CopiarDiretorio(string sourcePath, string destPath)
+        {
+            if (!Directory.Exists(destPath))
+            {
+                Directory.CreateDirectory(destPath);
+            }
+
+            foreach (string file in Directory.GetFiles(sourcePath))
+            {
+                string dest = Path.Combine(destPath, Path.GetFileName(file));
+                File.Copy(file, dest);
+            }
+
+            foreach (string folder in Directory.GetDirectories(sourcePath))
+            {
+                string dest = Path.Combine(destPath, Path.GetFileName(folder));
+                CopiarDiretorio(folder, dest);
+            }
+        }
+
         public static bool Descriptografar(string inputFile, string outputFile)
         {
             string password = @"346a23652a46392b4d73257c67317e352e3372482177652c"; // Your Key Here

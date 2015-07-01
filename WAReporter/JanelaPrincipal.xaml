@@ -7,23 +7,27 @@
         mc:Ignorable="d" WindowState="Maximized"
         Title="WAReport - Gerador de Relatórios de Conversações WhatsApp">
     <Window.Resources>
-        <RoutedUICommand x:Key="Abrir" Text="Abrir" />
+        <RoutedUICommand x:Key="AbrirAndroid" Text="Abrir Android" />
+        <RoutedUICommand x:Key="AbrirIPhone" Text="Abrir iPhone" />
         <RoutedUICommand x:Key="Extrair" Text="Extrair" />
         <RoutedUICommand x:Key="Sair" Text="Sair" />
     </Window.Resources>
     <Window.CommandBindings>
-        <CommandBinding Command="{StaticResource Abrir}" Executed="AbrirCommand_Executed"/>
+        <CommandBinding Command="{StaticResource AbrirAndroid}" Executed="AbrirAndroidCommand_Executed"/>
+        <CommandBinding Command="{StaticResource AbrirIPhone}" Executed="AbrirIPhoneCommand_Executed"/>
         <CommandBinding Command="{StaticResource Extrair}" Executed="ExtrairCommand_Executed"/>
         <CommandBinding Command="{StaticResource Sair}" Executed="SairCommand_Executed"/>
     </Window.CommandBindings>
     <Window.InputBindings>
-        <KeyBinding Key="O" Modifiers="Control" Command="{StaticResource Abrir}"></KeyBinding>
+        <KeyBinding Key="O" Modifiers="Control" Command="{StaticResource AbrirAndroid}"></KeyBinding>
+        <KeyBinding Key="I" Modifiers="Control" Command="{StaticResource AbrirIPhone}"></KeyBinding>
         <KeyBinding Key="E" Modifiers="Control" Command="{StaticResource Extrair}"></KeyBinding>
     </Window.InputBindings>
     <StackPanel>
         <Menu>
             <MenuItem Header="Arquivo">
-                <MenuItem Header="Abrir" Command="{StaticResource Abrir}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="Abrir Android" Command="{StaticResource AbrirAndroid}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="Abrir iPhone" Command="{StaticResource AbrirIPhone}" InputGestureText="Ctrl+I"/>
                 <MenuItem Header="Extrair Criptografia" Command="{StaticResource Extrair}" InputGestureText="Ctrl+E"/>
                 <Separator></Separator>
                 <MenuItem Header="Sair" Command="{StaticResource Sair}" InputGestureText="Alt+F4"/>

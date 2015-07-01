@@ -19,16 +19,22 @@ namespace WAReporter
         public JanelaPrincipal()
         {
             InitializeComponent();
+
+            //foreach (var arquivoAvatar in Directory.GetFiles(@"I:\whatsApp_private\profpics"))
+            //    if (!File.Exists(arquivoAvatar + ".jpg"))
+            //        File.Copy(arquivoAvatar, arquivoAvatar + ".jpg");
+
+
         }
 
-        private void AbrirCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void AbrirAndroidCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            var janelaAbrirArquivo = new JanelaAbrirArquivo();
-            janelaAbrirArquivo.SelecaoOk += delegate
+            var janelaAbrirArquivoAndroid = new JanelaAbrirArquivoAndroid();
+            janelaAbrirArquivoAndroid.SelecaoOk += delegate
             {
-                CaminhoMsgStoreDb = janelaAbrirArquivo.arquivoTextBox.Text.Replace(".db.crypt", ".db");
-                CaminhoWaDb = janelaAbrirArquivo.waDbTextBox.Text;
-                var resultadoCarregamento = Banco.CarregarBanco(CaminhoMsgStoreDb, CaminhoWaDb);
+                CaminhoMsgStoreDb = janelaAbrirArquivoAndroid.arquivoTextBox.Text.Replace(".db.crypt", ".db");
+                CaminhoWaDb = janelaAbrirArquivoAndroid.waDbTextBox.Text;
+                var resultadoCarregamento = Banco.CarregarBancoAndroid(CaminhoMsgStoreDb, CaminhoWaDb);
                 if(resultadoCarregamento.StartsWith("ERRO"))
                 {
                     MessageBox.Show(resultadoCarregamento);
@@ -45,12 +51,47 @@ namespace WAReporter
 
                     contatosDataGrid.ItemsSource = ItensDataGrid;
 
-                    Midia.Procurar(Directory.GetParent(System.IO.Path.GetDirectoryName(janelaAbrirArquivo.arquivoTextBox.Text)).FullName);
+                    Midia.Procurar(Directory.GetParent(System.IO.Path.GetDirectoryName(janelaAbrirArquivoAndroid.arquivoTextBox.Text)).FullName);
 
                 }
             };
-            janelaAbrirArquivo.ShowDialog();
+            janelaAbrirArquivoAndroid.ShowDialog();
         }
+
+        private void AbrirIPhoneCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var janelaAbrirArquivoIPhone = new JanelaAbrirArquivoIPhone();
+            janelaAbrirArquivoIPhone.SelecaoOk += delegate
+            {
+                CaminhoMsgStoreDb = janelaAbrirArquivoIPhone.arquivoTextBox.Text.Replace(".db.crypt", ".db");
+                CaminhoWaDb = janelaAbrirArquivoIPhone.contactsSqliteTextBox.Text;
+                var resultadoCarregamento = Banco.CarregarBancoIPhone(CaminhoMsgStoreDb, CaminhoWaDb);
+                if (resultadoCarregamento.StartsWith("ERRO"))
+                {
+                    MessageBox.Show(resultadoCarregamento);
+                }
+                else
+                {
+                    ItensDataGrid = new List<DataGridItem>();
+                    foreach (var chat in Banco.Chats)
+                        ItensDataGrid.Add(new DataGridItem
+                        {
+                            ChatItem = chat,
+                            NomeContato = chat.Contato.NomeContato + chat.Subject,
+                            UltimaMensagem = chat.Mensagens.Any() ? chat.Mensagens.Max(p => p.Timestamp).ToString() : "",
+                            IsSelecionado = false
+                        });
+
+
+                    contatosDataGrid.ItemsSource = ItensDataGrid;
+
+                    Midia.Procurar(Directory.GetParent(System.IO.Path.GetDirectoryName(janelaAbrirArquivoIPhone.arquivoTextBox.Text)).FullName);
+
+                }
+            };
+            janelaAbrirArquivoIPhone.ShowDialog();
+        }
+
 
         private void ExtrairCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -59,7 +100,7 @@ namespace WAReporter
             {
                 CaminhoMsgStoreDb = janelaExtrairCriptografia.arquivoTextBox.Text.Replace(".db.crypt", ".db");
                 //CaminhoWaDb = janelaExtrairCriptografia.waDbTextBox.Text;
-                var resultadoCarregamento = Banco.CarregarBanco(CaminhoMsgStoreDb, CaminhoWaDb);
+                var resultadoCarregamento = Banco.CarregarBancoAndroid(CaminhoMsgStoreDb, CaminhoWaDb);
                 if (resultadoCarregamento.StartsWith("ERRO"))
                 {
                     MessageBox.Show(resultadoCarregamento);
