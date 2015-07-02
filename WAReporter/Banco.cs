@@ -350,24 +350,17 @@ namespace WAReporter
                 while (chatSessionReader.Read())
                 {
                     var chat = new Chat();
-                    chat.Id = chatSessionReader.GetInt32(chatSessionReader.GetOrdinal(""));
-                    chat.KeyRemoteJid = chatSessionReader.IsDBNull(1) ? null : chatSessionReader.GetString(1);
-                    chat.MessageTableId = chatSessionReader.IsDBNull(2) ? 0 : chatSessionReader.GetInt32(2);
-                    chat.Subject = chatSessionReader.IsDBNull(3) ? null : chatSessionReader.GetString(3);
-                    chat.Creation = chatSessionReader.IsDBNull(4) ? DateTime.MinValue : chatSessionReader.GetInt64(4).TimeStampParaDateTime();
-                    chat.LastReadMessageTableId = chatSessionReader.IsDBNull(5) ? -1 : chatSessionReader.GetInt32(5);
-                    chat.LastReadReceiptSentMessageTableId = chatSessionReader.IsDBNull(6) ? -1 : chatSessionReader.GetInt32(6);
-                    chat.Archived = chatSessionReader.IsDBNull(7) ? -1 : chatSessionReader.GetInt32(7);
-                    chat.SortTimestamp = chatSessionReader.IsDBNull(8) ? -1 : chatSessionReader.GetInt32(8);
-                    chat.ModTag = chatSessionReader.IsDBNull(9) ? -1 : chatSessionReader.GetInt32(9);
-
-                    if (!String.IsNullOrWhiteSpace(chat.Subject))
-                    {
-                        var s = chatSessionReader.GetValue(3);
-
-
-                    }
-
+                    chat.Id = chatSessionReader.GetInt32(chatSessionReader.GetOrdinal("Z_PK"));
+                    chat.KeyRemoteJid = chatSessionReader.IsDBNull(1) ? null : chatSessionReader.GetString(chatSessionReader.GetOrdinal("ZCONTACTJID"));
+                    //chat.MessageTableId = chatSessionReader.IsDBNull(2) ? 0 : chatSessionReader.GetInt32(2);
+                    chat.Subject = chatSessionReader.IsDBNull(3) ? null : chatSessionReader.GetString(chatSessionReader.GetOrdinal("ZPARTNERNAME"));
+                    //chat.Creation = chatSessionReader.IsDBNull(4) ? DateTime.MinValue : chatSessionReader.GetInt64(4).TimeStampParaDateTime();
+                    chat.LastReadMessageTableId = chatSessionReader.GetInt32(chatSessionReader.GetOrdinal("ZLASTMESSAGE"));
+                    //chat.LastReadReceiptSentMessageTableId = chatSessionReader.IsDBNull(6) ? -1 : chatSessionReader.GetInt32(6);
+                    //chat.Archived = chatSessionReader.IsDBNull(7) ? -1 : chatSessionReader.GetInt32(7);
+                    //chat.SortTimestamp = chatSessionReader.IsDBNull(8) ? -1 : chatSessionReader.GetInt32(8);
+                    //chat.ModTag = chatSessionReader.IsDBNull(9) ? -1 : chatSessionReader.GetInt32(9);
+                    
                     Chats.Add(chat);
                 }
                 #endregion
@@ -376,7 +369,7 @@ namespace WAReporter
                 GroupParticipants = new List<GroupParticipant>();
                 try
                 {
-                    var groupParticipantReader = new SQLiteCommand("select * from group_participants;", ConexaoChatStorage).ExecuteReader();
+                    var groupParticipantReader = new SQLiteCommand("select * from ZWAGROUPMEMBER;", ConexaoChatStorage).ExecuteReader();
                     while (groupParticipantReader.Read())
                     {
                         var groupParticipant = new GroupParticipant();

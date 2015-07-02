@@ -23,8 +23,6 @@ namespace WAReporter
             //foreach (var arquivoAvatar in Directory.GetFiles(@"I:\whatsApp_private\profpics"))
             //    if (!File.Exists(arquivoAvatar + ".jpg"))
             //        File.Copy(arquivoAvatar, arquivoAvatar + ".jpg");
-
-
         }
 
         private void AbrirAndroidCommand_Executed(object sender, ExecutedRoutedEventArgs e)

@@ -51,7 +51,7 @@ namespace WAReporter
                 startInfo.UseShellExecute = false;
                 var process = new Process();
                 process.StartInfo = startInfo;
-                startInfo.FileName = "C:\\ffmpeg\\bin\\ffmpeg.exe";
+                startInfo.FileName = "ffmpeg.exe";
                 process.Start();
             }
 
@@ -65,7 +65,7 @@ namespace WAReporter
                 startInfo.UseShellExecute = false;
                 var process = new Process();
                 process.StartInfo = startInfo;
-                startInfo.FileName = "C:\\ffmpeg\\bin\\ffmpeg.exe";
+                startInfo.FileName = "ffmpeg.exe";
                 process.Start();
             }
 
@@ -75,7 +75,7 @@ namespace WAReporter
             {
                 if (arquivoVideo.EndsWith("_.mp4") || File.Exists(arquivoVideo.Replace(".mp4", "_.mp4"))) continue;
 
-                var arq = UtilitariosVideo.GetVideoMetadata("C:\\ffmpeg\\bin\\ffmpeg.exe", arquivoVideo);
+                var arq = UtilitariosVideo.GetVideoMetadata("ffmpeg.exe", arquivoVideo);
                 var i = arq.IndexOf("Stream #0:0") + 24;
                 var j = arq.IndexOf("Stream #0:1");
 
@@ -88,7 +88,7 @@ namespace WAReporter
                     startInfo.UseShellExecute = false;
                     var process = new Process();
                     process.StartInfo = startInfo;
-                    startInfo.FileName = "C:\\ffmpeg\\bin\\ffmpeg.exe";
+                    startInfo.FileName = "ffmpeg.exe";
                     process.Start();
                 }
             }
