@@ -369,20 +369,18 @@ namespace WAReporter
                 GroupParticipants = new List<GroupParticipant>();
                 try
                 {
-                    var groupParticipantReader = new SQLiteCommand("select * from ZWAGROUPMEMBER;", ConexaoChatStorage).ExecuteReader();
+                    var groupParticipantReader = new SQLiteCommand("select * from ZWAGROUPMEMBER, ZWAGROUPINFO where ZWAGROUPMEMBER.ZCHATSESSION = ZWAGROUPINFO.Z_PK;", ConexaoChatStorage).ExecuteReader();
                     while (groupParticipantReader.Read())
                     {
                         var groupParticipant = new GroupParticipant();
-                        groupParticipant.Id = groupParticipantReader.GetInt32(0);
-                        groupParticipant.Gjid = groupParticipantReader.GetString(1);
-                        groupParticipant.Jid = groupParticipantReader.GetString(2);
-                        groupParticipant.Admin = groupParticipantReader.IsDBNull(3) ? -1 : groupParticipantReader.GetInt32(3);
-                        groupParticipant.Pending = groupParticipantReader.IsDBNull(4) ? -1 : groupParticipantReader.GetInt32(4);
+                        groupParticipant.Id = groupParticipantReader.GetInt32(chatSessionReader.GetOrdinal("Z_PK"));
+                        groupParticipant.Gjid = groupParticipantReader.GetString(chatSessionReader.GetOrdinal("ZCONTACTJID"));
+                        groupParticipant.Jid = groupParticipantReader.GetString(chatSessionReader.GetOrdinal("ZMEMBERJID"));
+                        groupParticipant.Admin = groupParticipantReader.GetInt32(chatSessionReader.GetOrdinal("ZISADMIN"));
+                        //groupParticipant.Pending = groupParticipantReader.IsDBNull(4) ? -1 : groupParticipantReader.GetInt32(4);
 
                         GroupParticipants.Add(groupParticipant);
-
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -397,115 +395,102 @@ namespace WAReporter
                 #endregion
 
                 #region importa group_participants_history
-                try
-                {
-                    GroupParticipantHistories = new List<GroupParticipantHistory>();
-                    var groupParticipantHistoriesReader = new SQLiteCommand("select * from group_participants_history;", ConexaoChatStorage).ExecuteReader();
-                    while (groupParticipantHistoriesReader.Read())
-                    {
-                        var groupParticipantHistory = new GroupParticipantHistory();
-                        groupParticipantHistory.Id = groupParticipantHistoriesReader.GetInt32(0);
-                        groupParticipantHistory.Timestamp = groupParticipantHistoriesReader.IsDBNull(1) ? DateTime.MinValue : groupParticipantHistoriesReader.GetInt64(1).TimeStampParaDateTime();
-                        groupParticipantHistory.GJid = groupParticipantHistoriesReader.GetString(2);
-                        groupParticipantHistory.Jid = groupParticipantHistoriesReader.GetString(3);
-                        groupParticipantHistory.Action = groupParticipantHistoriesReader.IsDBNull(4) ? -1 : groupParticipantHistoriesReader.GetInt32(4);
-                        groupParticipantHistory.OldPhash = groupParticipantHistoriesReader.GetString(5);
-                        groupParticipantHistory.NewPhash = groupParticipantHistoriesReader.GetString(6);
+                //try
+                //{
+                //    GroupParticipantHistories = new List<GroupParticipantHistory>();
+                //    var groupParticipantHistoriesReader = new SQLiteCommand("select * from group_participants_history;", ConexaoChatStorage).ExecuteReader();
+                //    while (groupParticipantHistoriesReader.Read())
+                //    {
+                //        var groupParticipantHistory = new GroupParticipantHistory();
+                //        groupParticipantHistory.Id = groupParticipantHistoriesReader.GetInt32(0);
+                //        groupParticipantHistory.Timestamp = groupParticipantHistoriesReader.IsDBNull(1) ? DateTime.MinValue : groupParticipantHistoriesReader.GetInt64(1).TimeStampParaDateTime();
+                //        groupParticipantHistory.GJid = groupParticipantHistoriesReader.GetString(2);
+                //        groupParticipantHistory.Jid = groupParticipantHistoriesReader.GetString(3);
+                //        groupParticipantHistory.Action = groupParticipantHistoriesReader.IsDBNull(4) ? -1 : groupParticipantHistoriesReader.GetInt32(4);
+                //        groupParticipantHistory.OldPhash = groupParticipantHistoriesReader.GetString(5);
+                //        groupParticipantHistory.NewPhash = groupParticipantHistoriesReader.GetString(6);
 
-                        GroupParticipantHistories.Add(groupParticipantHistory);
-                    }
+                //        GroupParticipantHistories.Add(groupParticipantHistory);
+                //    }
 
-                }
-                catch (Exception ex)
-                {
-                    if (!ex.Message.Contains("no such table")) throw ex;
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    if (!ex.Message.Contains("no such table")) throw ex;
+                //}
                 #endregion
 
                 #region importa media_refs
-                try
-                {
-                    MediaRefs = new List<MediaRef>();
-                    var mediaRefsReader = new SQLiteCommand("select * from media_refs;", ConexaoChatStorage).ExecuteReader();
-                    while (mediaRefsReader.Read())
-                    {
-                        var mediaRef = new MediaRef();
-                        mediaRef.Id = mediaRefsReader.GetInt32(0);
-                        mediaRef.Path = mediaRefsReader.GetString(1);
-                        mediaRef.RefCount = mediaRefsReader.IsDBNull(2) ? -1 : mediaRefsReader.GetInt32(2);
+                //try
+                //{
+                //    MediaRefs = new List<MediaRef>();
+                //    var mediaRefsReader = new SQLiteCommand("select * from media_refs;", ConexaoChatStorage).ExecuteReader();
+                //    while (mediaRefsReader.Read())
+                //    {
+                //        var mediaRef = new MediaRef();
+                //        mediaRef.Id = mediaRefsReader.GetInt32(0);
+                //        mediaRef.Path = mediaRefsReader.GetString(1);
+                //        mediaRef.RefCount = mediaRefsReader.IsDBNull(2) ? -1 : mediaRefsReader.GetInt32(2);
 
-                        MediaRefs.Add(mediaRef);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (!ex.Message.Contains("no such table")) throw ex;
-                }
+                //        MediaRefs.Add(mediaRef);
+                //    }
+                //}
+                //catch (Exception ex)
+                //{
+                //    if (!ex.Message.Contains("no such table")) throw ex;
+                //}
                 #endregion
 
                 #region importa messages
                 Messages = new List<Message>();
-                var messagesReader = new SQLiteCommand("select * from messages;", ConexaoChatStorage).ExecuteReader();
+                var messagesReader = new SQLiteCommand("select * from ZWAMESSAGE left join ZWAMEDIAITEM on ZWAMESSAGE.Z_PK = ZWAMEDIAITEM.ZMESSAGE;", ConexaoChatStorage).ExecuteReader();
                 while (messagesReader.Read())
                 {
                     var message = new Message();
-                    message.Id = messagesReader.GetInt32(messagesReader.GetOrdinal("_id"));
-                    if (message.Id == 1) continue;
-                    message.KeyRemoteJid = messagesReader.GetString(messagesReader.GetOrdinal("key_remote_jid"));
-                    message.KeyFromMe = messagesReader.IsDBNull(messagesReader.GetOrdinal("key_from_me")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("key_from_me"));
-                    message.KeyId = messagesReader.GetString(messagesReader.GetOrdinal("key_id"));
-                    message.Status = messagesReader.IsDBNull(messagesReader.GetOrdinal("status")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("status"));
-                    message.NeedsPush = messagesReader.IsDBNull(messagesReader.GetOrdinal("needs_push")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("needs_push"));
-                    message.Data = messagesReader.IsDBNull(messagesReader.GetOrdinal("data")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("data"));
-                    message.Timestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("timestamp")).TimeStampParaDateTime();
-                    message.MediaUrl = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_url")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_url"));
-                    message.MediaMimeType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_mime_type")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_mime_type"));
-                    message.MediaWaType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_wa_type")) ? MediaWhatsappType.MEDIA_WHATSAPP_TEXT :
-                        (MediaWhatsappType)Enum.Parse(typeof(MediaWhatsappType), messagesReader.GetString(messagesReader.GetOrdinal("media_wa_type")));
-                    message.MediaSize = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_size")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_size"));
-                    message.MediaName = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_name")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_name"));
-                    message.MediaHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_hash"));
-                    message.MediaCaption = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_caption")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_caption"));
+                    message.Id = messagesReader.GetInt32(messagesReader.GetOrdinal("Z_PK"));
+                    //if (message.Id == 1) continue;
+                    message.KeyFromMe = messagesReader.GetInt32(messagesReader.GetOrdinal("ZISFROMME"));
+                    message.KeyRemoteJid = message.KeyFromMe == 1 ?
+                        messagesReader.GetString(messagesReader.GetOrdinal("ZTOJID")) :
+                        messagesReader.GetString(messagesReader.GetOrdinal("ZFROMJID")) ;
+                    
+                    message.Status = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZMESSAGESTATUS")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("ZMESSAGESTATUS"));
+                    message.Data = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZTEXT")) ? "" :  messagesReader.GetString(messagesReader.GetOrdinal("ZTEXT"));
+                    message.MediaUrl = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZMEDIAURL")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("ZMEDIAURL"));
+                   
 
-                    message.MediaDuration = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_duration")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_duration"));
+                    message.Latitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZLATITUDE")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("ZLATITUDE")).ToString();
+                    message.Longitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZLONGITUDE")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("ZLONGITUDE")).ToString();
+                    message.ThumbImage = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZXMPPTHUMBPATH")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("ZXMPPTHUMBPATH"));
 
-                    message.Origin = messagesReader.IsDBNull(messagesReader.GetOrdinal("origin")) ? -1 : messagesReader.GetDouble(messagesReader.GetOrdinal("origin"));
-                    message.Latitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("latitude")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("latitude")).ToString();
-                    message.Longitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("longitude")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("longitude")).ToString();
-                    message.ThumbImage = messagesReader.IsDBNull(messagesReader.GetOrdinal("thumb_image")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("thumb_image"));
+                    //message.MediaDuration = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_duration")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_duration"));
+                    //message.Origin = messagesReader.IsDBNull(messagesReader.GetOrdinal("origin")) ? -1 : messagesReader.GetDouble(messagesReader.GetOrdinal("origin"));
+                    //message.NeedsPush = messagesReader.IsDBNull(messagesReader.GetOrdinal("needs_push")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("needs_push"));
+                    //message.KeyId = messagesReader.GetString(messagesReader.GetOrdinal("key_id"));
+                    //message.MediaMimeType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_mime_type")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_mime_type"));
+                    //message.MediaWaType = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_wa_type")) ? MediaWhatsappType.MEDIA_WHATSAPP_TEXT :
+                    //    (MediaWhatsappType)Enum.Parse(typeof(MediaWhatsappType), messagesReader.GetString(messagesReader.GetOrdinal("media_wa_type")));
+                    //message.MediaSize = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_size")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_size"));
+                    //message.MediaName = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_name")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_name"));
+                    //message.MediaHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_hash"));
+                    //message.MediaCaption = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_caption")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_caption"));
 
-
-                    message.RemoteResource = messagesReader.IsDBNull(messagesReader.GetOrdinal("remote_resource")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("remote_resource"));
-                    message.ReceivedTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("received_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("received_timestamp")).TimeStampParaDateTime();
-                    message.SendTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("send_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("send_timestamp")).TimeStampParaDateTime();
-                    message.ReceiptServerTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_server_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_server_timestamp")).TimeStampParaDateTime();
+                    //message.RemoteResource = messagesReader.IsDBNull(messagesReader.GetOrdinal("remote_resource")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("remote_resource"));
+                    //message.ReceivedTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("received_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("received_timestamp")).TimeStampParaDateTime();
+                    //message.SendTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("send_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("send_timestamp")).TimeStampParaDateTime();
+                    //message.ReceiptServerTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_server_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_server_timestamp")).TimeStampParaDateTime();
                     //   var val = messagesReader.GetValue(24);
                     //  var v2 = val.GetType();
 
-                    message.ReceiptDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_device_timestamp")).TimeStampParaDateTime();
-                    message.ReadDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("read_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("read_device_timestamp")).TimeStampParaDateTime();
-                    message.PlayedDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("played_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("played_device_timestamp")).TimeStampParaDateTime();
-                    message.RecipientCount = messagesReader.IsDBNull(messagesReader.GetOrdinal("recipient_count")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("recipient_count"));
-                    message.ParticipantHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("participant_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("participant_hash"));
+                    //message.ReceiptDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_device_timestamp")).TimeStampParaDateTime();
+                    //message.ReadDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("read_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("read_device_timestamp")).TimeStampParaDateTime();
+                    //message.PlayedDeviceTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("played_device_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("played_device_timestamp")).TimeStampParaDateTime();
+                    //message.RecipientCount = messagesReader.IsDBNull(messagesReader.GetOrdinal("recipient_count")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("recipient_count"));
+                    //message.ParticipantHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("participant_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("participant_hash"));
 
-
-                    if (!messagesReader.IsDBNull(messagesReader.GetOrdinal("raw_data")))
-                    {
-                        const int CHUNK_SIZE = 2 * 1024;
-                        byte[] buffer = new byte[CHUNK_SIZE];
-                        long bytesRead;
-                        long fieldOffset = 0;
-                        using (MemoryStream stream = new MemoryStream())
-                        {
-                            while ((bytesRead = messagesReader.GetBytes(messagesReader.GetOrdinal("raw_data"), fieldOffset, buffer, 0, buffer.Length)) > 0)
-                            {
-                                stream.Write(buffer, 0, (int)bytesRead);
-                                fieldOffset += bytesRead;
-                            }
-                            message.RawData = stream.ToArray();
-                        }
-                    }
-
+                    var dataBanco = messagesReader.GetString(messagesReader.GetOrdinal("ZMESSAGEDATE")).Split('.')[0];
+                    message.Timestamp = (Convert.ToInt64(dataBanco) + 11323 * 60 * 1440).TimeStampParaDateTime();
+                    
                     Messages.Add(message);
                 }
 
@@ -519,28 +504,28 @@ namespace WAReporter
                 #endregion
 
                 #region importa receipt
-                try
-                {
-                    Receipts = new List<Receipt>();
-                    var receiptsReader = new SQLiteCommand("select * from receipts;", ConexaoChatStorage).ExecuteReader();
-                    while (receiptsReader.Read())
-                    {
-                        var receipt = new Receipt();
-                        receipt.Id = receiptsReader.GetInt32(0);
-                        receipt.KeyRemoteJid = receiptsReader.GetString(1);
-                        receipt.KeyId = receiptsReader.GetString(2);
-                        receipt.RemoteResource = receiptsReader.GetString(3);
-                        receipt.ReceiptDeviceTimestamp = receiptsReader.IsDBNull(4) ? DateTime.MinValue : receiptsReader.GetInt64(4).TimeStampParaDateTime();
-                        receipt.ReadDeviceTimestamp = receiptsReader.IsDBNull(5) ? DateTime.MinValue : receiptsReader.GetInt64(5).TimeStampParaDateTime();
-                        receipt.PlayedDeviceTimestamp = receiptsReader.IsDBNull(6) ? DateTime.MinValue : receiptsReader.GetInt64(6).TimeStampParaDateTime();
+                //try
+                //{
+                //    Receipts = new List<Receipt>();
+                //    var receiptsReader = new SQLiteCommand("select * from receipts;", ConexaoChatStorage).ExecuteReader();
+                //    while (receiptsReader.Read())
+                //    {
+                //        var receipt = new Receipt();
+                //        receipt.Id = receiptsReader.GetInt32(0);
+                //        receipt.KeyRemoteJid = receiptsReader.GetString(1);
+                //        receipt.KeyId = receiptsReader.GetString(2);
+                //        receipt.RemoteResource = receiptsReader.GetString(3);
+                //        receipt.ReceiptDeviceTimestamp = receiptsReader.IsDBNull(4) ? DateTime.MinValue : receiptsReader.GetInt64(4).TimeStampParaDateTime();
+                //        receipt.ReadDeviceTimestamp = receiptsReader.IsDBNull(5) ? DateTime.MinValue : receiptsReader.GetInt64(5).TimeStampParaDateTime();
+                //        receipt.PlayedDeviceTimestamp = receiptsReader.IsDBNull(6) ? DateTime.MinValue : receiptsReader.GetInt64(6).TimeStampParaDateTime();
 
-                        Receipts.Add(receipt);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (!ex.Message.Contains("no such table")) throw ex;
-                }
+                //        Receipts.Add(receipt);
+                //    }
+                //}
+                //catch (Exception ex)
+                //{
+                //    if (!ex.Message.Contains("no such table")) throw ex;
+                //}
                 #endregion
 
                 ConexaoChatStorage.Close();
