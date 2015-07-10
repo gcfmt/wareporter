@@ -146,7 +146,7 @@ namespace WAReporter
                 return;
             }
             
-            var caminhoRelatorio = Path.Combine(Path.GetDirectoryName(CaminhoMsgStoreDb), "WhatsApp - Relatório.html");
+            var caminhoRelatorio = Path.Combine(Path.GetDirectoryName(CaminhoMsgStoreDb), "WhatsApp - Relatório "+Midia.NomeUsuario+".html");
             var resultado = GeradorRelatorio.GerarRelatorioHtml(itensSelecionados.Select(p => p.ChatItem).ToList(), caminhoRelatorio);
         }
 

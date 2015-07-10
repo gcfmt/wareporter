@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using WAReporter.Modelo;
 using WAReporter.Utilitarios;
@@ -15,6 +16,7 @@ namespace WAReporter
         public static List<String> CaminhoVideos { get; set; }
         public static List<String> CaminhoAudios { get; set; }
         public static List<String> CaminhoAvatares { get; set; }
+        public static String StatusUsuario { get; set; }
         public static String TelefoneUsuario { get; set; }
         public static String NomeUsuario { get; set; }
         public static String CaminhoFotoPessoal { get; set; }
@@ -28,18 +30,47 @@ namespace WAReporter
             CaminhoFotoPessoal = "";
             CaminhoAvatares = new List<String>();
 
-            var arquivoMeJpg = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => p.Name == "me.jpg");
-            if (arquivoMeJpg.Any()) CaminhoFotoPessoal = arquivoMeJpg.First();
-
-            var arquivoMe = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => p.Name == "me");
-            if(arquivoMe.Any())
+            if (Banco.TipoDispositivo == TiposDispositivo.ANDROID)
             {
-                TelefoneUsuario = File.ReadAllText(arquivoMe.First()).Split('\0')[13].Replace("t", "").Replace("\f", "");
-                var contatoUsuario = Banco.WaContacts.FirstOrDefault(p => p.Jid.Contains(TelefoneUsuario) && !p.Jid.Contains("-"));
-                if(contatoUsuario != null)
-                    NomeUsuario =  contatoUsuario.NomeContato;
-
+                var arquivoMeJpg = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => p.Name == "me.jpg");
+                if (arquivoMeJpg.Any()) CaminhoFotoPessoal = arquivoMeJpg.First().Replace(caminhoPastaWhatsApp, "..");
+            } else if (Banco.TipoDispositivo == TiposDispositivo.IOS)
+            {
+                var arquivoMeJpg = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => p.Name == "Photo.jpg");
+                if (arquivoMeJpg.Any()) CaminhoFotoPessoal = arquivoMeJpg.First().Replace(caminhoPastaWhatsApp, "..");
             }
+
+
+            if (Banco.TipoDispositivo == TiposDispositivo.ANDROID)
+            {                
+                var arquivoMe = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => p.Name == "me");
+                if(arquivoMe.Any())
+                {
+                    TelefoneUsuario = File.ReadAllText(arquivoMe.First()).Split('\0')[13].Replace("t", "").Replace("\f", "");
+                    var contatoUsuario = Banco.WaContacts.FirstOrDefault(p => p.Jid.Contains(TelefoneUsuario) && !p.Jid.Contains("-"));
+                    if(contatoUsuario != null)
+                        NomeUsuario =  contatoUsuario.NomeContato;
+                }
+            }
+            else if (Banco.TipoDispositivo == TiposDispositivo.IOS)
+            {
+
+                var arquivoMe = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => p.Name == "net.whatsapp.WhatsApp.plist");
+                if (arquivoMe.Any())
+                {
+                    var conteudoArquivoMe = File.ReadAllText(arquivoMe.First());
+
+                    TelefoneUsuario = conteudoArquivoMe.Substring(conteudoArquivoMe.IndexOf("OwnJabberID")).Substring(27);
+                    TelefoneUsuario = TelefoneUsuario.Substring(0, TelefoneUsuario.IndexOf("</string>"));
+
+                    NomeUsuario = conteudoArquivoMe.Substring(conteudoArquivoMe.IndexOf("FullUserName")).Substring(28);
+                    NomeUsuario = NomeUsuario.Substring(0, NomeUsuario.IndexOf("</string>"));
+
+                    StatusUsuario = conteudoArquivoMe.Substring(conteudoArquivoMe.IndexOf("CurrentStatusText")).Substring(33);
+                    StatusUsuario = StatusUsuario.Substring(0, StatusUsuario.IndexOf("</string>"));
+                }
+            }
+
 
             var audiosAmr = UtilitariosArquivo.ObterArquivos(Path.Combine(caminhoPastaWhatsApp, "*.*"), (p) => Path.GetExtension(p.Name) == ".amr");
             foreach (var audioAmr in audiosAmr)
@@ -104,15 +135,32 @@ namespace WAReporter
 
             if (File.Exists(Path.Combine(caminhoPastaFiles, "me.jpg"))) CaminhoFotoPessoal = Path.Combine(caminhoPastaFiles, "me.jpg");
 
-            if (!String.IsNullOrWhiteSpace(caminhoPastaFiles))
+            if(Banco.TipoDispositivo == TiposDispositivo.ANDROID)
             {
-                var pastaAvatars = Path.Combine(caminhoPastaFiles, "Avatars");
-                if (Directory.Exists(pastaAvatars))
-                    foreach (var arquivoAvatar in Directory.GetFiles(pastaAvatars).Where(p => p.EndsWith(".j")))
-                        if (!File.Exists(arquivoAvatar + "pg"))
-                            File.Copy(arquivoAvatar, arquivoAvatar + "pg");
-                CaminhoAvatares = UtilitariosArquivo.ObterArquivos(Path.Combine(pastaAvatars, "*.*"), (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
+                if (!String.IsNullOrWhiteSpace(caminhoPastaFiles))
+                {
+                    var pastaAvatars = Path.Combine(caminhoPastaFiles, "Avatars");
+                    if (Directory.Exists(pastaAvatars))
+                        foreach (var arquivoAvatar in Directory.GetFiles(pastaAvatars).Where(p => p.EndsWith(".j")))
+                            if (!File.Exists(arquivoAvatar + "pg"))
+                                File.Copy(arquivoAvatar, arquivoAvatar + "pg");
+                    CaminhoAvatares = UtilitariosArquivo.ObterArquivos(Path.Combine(pastaAvatars, "*.*"), (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
+                }
+            } else if (Banco.TipoDispositivo == TiposDispositivo.IOS)
+            {
+                var pastaProfiles = Path.Combine(CaminhoPastaWhatsApp, "Profile");
+
+                if (!String.IsNullOrWhiteSpace(pastaProfiles))
+                {
+
+                    foreach (var arquivoAvatar in Directory.GetFiles(pastaProfiles).Where(p => p.EndsWith(".thumb")))
+                        if(!File.Exists(arquivoAvatar.Replace(".thumb", ".jpg")))
+                            File.Copy(arquivoAvatar, arquivoAvatar.Replace(".thumb", ".jpg"));
+                    CaminhoAvatares = UtilitariosArquivo.ObterArquivos(Path.Combine(pastaProfiles, "*.*"), (p) => Path.GetExtension(p.Name) == ".jpg").ToList();
+                }
             }
+
+
 
             //Muda os caminhos de absolutos para relativos, em relação à pasta de banco de dados (também é a pasta em que o relatório html é gerado)
             for (int i = 0; i < CaminhoImagens.Count; i++) CaminhoImagens[i] = CaminhoImagens[i].Replace(caminhoPastaWhatsApp, "..");
@@ -127,91 +175,192 @@ namespace WAReporter
 
         public static String ObterImagemDaMensagem(Message mensagem)
         {
-            var propriedadesImagemMensagem = mensagem.ThumbImage;
-            if (propriedadesImagemMensagem.Contains("IMG"))
+            switch(Banco.TipoDispositivo)
             {
-                var nomeArquivoImagem = propriedadesImagemMensagem.Substring(propriedadesImagemMensagem.IndexOf("IMG"), 23);
-                var caminho = CaminhoImagens.FirstOrDefault(p => p.Contains(nomeArquivoImagem));
-                return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"" + caminho + "\">";
+                case TiposDispositivo.ANDROID:
+                    var propriedadesImagemMensagem = mensagem.ThumbImage;
+                    if (propriedadesImagemMensagem.Contains("IMG"))
+                    {
+                        var nomeArquivoImagem = propriedadesImagemMensagem.Substring(propriedadesImagemMensagem.IndexOf("IMG"), 23);
+                        var caminho = CaminhoImagens.FirstOrDefault(p => p.Contains(nomeArquivoImagem));
+                        return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"" + caminho + "\">";
+                    }
+                    else
+                        return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
+                case TiposDispositivo.IOS:
+                    var caminhoRelativoImagem = mensagem.MediaLocalPath;
+                    if(!String.IsNullOrWhiteSpace(caminhoRelativoImagem))
+                    {
+                        var nomeArquivo = Path.GetFileNameWithoutExtension(caminhoRelativoImagem);
+                        var caminho = CaminhoImagens.FirstOrDefault(p => p.Contains(nomeArquivo));
+                        if(caminho != null)
+                            return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"" + caminho + "\">";
+                    }
+
+                    var caminhoRemotoImagem = mensagem.MediaUrl;
+                    if (caminhoRemotoImagem != null)
+                    {
+                        if (!Directory.Exists(Path.Combine(CaminhoPastaWhatsApp, "DownloadedMedia")))
+                            Directory.CreateDirectory(Path.Combine(CaminhoPastaWhatsApp, "DownloadedMedia"));
+                        var nomeArquivoRemotoImagem = Path.Combine(CaminhoPastaWhatsApp, "DownloadedMedia", Path.GetFileName(caminhoRemotoImagem));
+
+                        if (!File.Exists(Path.Combine(CaminhoPastaWhatsApp, "DownloadedMedia", nomeArquivoRemotoImagem)))
+                            try
+                            {
+                                new WebClient().DownloadFile(mensagem.MediaUrl, nomeArquivoRemotoImagem);
+                            } catch (Exception ex) { }
+
+                        if (File.Exists(nomeArquivoRemotoImagem))
+                        {
+                            var caminhoRelativo = nomeArquivoRemotoImagem.Replace(CaminhoPastaWhatsApp, "..");
+                            return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"" + caminhoRelativo + "\">";
+                        }
+                    }
+
+                    var caminhoThumb = mensagem.ThumbImage;
+                    if (caminhoThumb != null && File.Exists(Path.Combine(CaminhoPastaWhatsApp, caminhoThumb)))
+                    {
+                        var caminhoImagemThumb = caminhoThumb.Replace(".thumb", ".jpg");
+                        if(!File.Exists(caminhoImagemThumb))
+                            File.Copy(caminhoThumb, caminhoThumb.Replace(".thumb", ".jpg"));
+
+                        if(File.Exists(caminhoImagemThumb))
+                        {
+                            var caminhoRelativoImagemThumb = caminhoImagemThumb.Replace(CaminhoPastaWhatsApp, "..");
+                            return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"" + caminhoRelativoImagemThumb + "\">";
+                        }
+                    }
+
+                    else
+                        return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE IMAGEM AUSENTE</span>";
+                        //return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
+                    break;
             }
-            else
-                return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
+            return "";
         }
-
-
 
         public static String ObterAvatar(String Id)
         {
-            return CaminhoAvatares.FirstOrDefault(p => p.Contains(Id)) ?? "";
+            if (Banco.TipoDispositivo == TiposDispositivo.ANDROID)
+                return CaminhoAvatares.LastOrDefault(p => p.Contains(Id)) ?? "";
+            else if (Banco.TipoDispositivo == TiposDispositivo.IOS)
+                return CaminhoAvatares.LastOrDefault(p => p.Contains(Id.Split('@')[0])) ?? "";
+            else return "";
         }
 
         public static string ObterAudioDaMensagem(Message mensagem)
         {
-            var dataPesquisa = mensagem.Timestamp.Date < mensagem.ReceivedTimestamp ? mensagem.Timestamp.Date : mensagem.ReceivedTimestamp;
-            while (dataPesquisa < DateTime.Today)
+            switch (Banco.TipoDispositivo)
             {
-                foreach (var audio in CaminhoAudios.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
-                {
-                    var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
-                    if (fi.Length == mensagem.MediaSize)
-                        return "<audio width=\"480\" controls><source src=\"" + audio.Replace(".amr", ".mp3").Replace(".3ga", ".mp3") + "\">Seu navegador não suporta áudio HTML5.</audio>";
-                }
-                dataPesquisa = dataPesquisa.AddDays(1);
+                case TiposDispositivo.ANDROID:
+                    var dataPesquisa = mensagem.Timestamp.Date < mensagem.ReceivedTimestamp ? mensagem.Timestamp.Date : mensagem.ReceivedTimestamp;
+                    while (dataPesquisa < DateTime.Today)
+                    {
+                        foreach (var audio in CaminhoAudios.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
+                        {
+                            var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
+                            if (fi.Length == mensagem.MediaSize)
+                                return "<audio width=\"480\" controls><source src=\"" + audio.Replace(".amr", ".mp3").Replace(".3ga", ".mp3") + "\">Seu navegador não suporta áudio HTML5.</audio>";
+                        }
+                        dataPesquisa = dataPesquisa.AddDays(1);
+                    }
+
+                    return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE ÁUDIO AUSENTE</span>";
+                case TiposDispositivo.IOS:
+                    //var dataPesquisaIOS = mensagem.Timestamp.Date < mensagem.ReceivedTimestamp ? mensagem.Timestamp.Date : mensagem.ReceivedTimestamp;
+                    //while (dataPesquisaIOS < DateTime.Today)
+                    //{
+                    //    foreach (var audio in CaminhoAudios.Where(p => p.Contains(dataPesquisaIOS.ToString("yyyyMMdd"))))
+                    //    {
+                    //        var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, audio.Replace("..\\", "")));
+                    //        if (fi.Length == mensagem.MediaSize)
+                    //            return "<audio width=\"480\" controls><source src=\"" + audio.Replace(".amr", ".mp3").Replace(".3ga", ".mp3") + "\">Seu navegador não suporta áudio HTML5.</audio>";
+                    //    }
+                    //    dataPesquisaIOS = dataPesquisaIOS.AddDays(1);
+                    //}
+
+                    //return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE ÁUDIO AUSENTE</span>";
+
+                    var caminhoRelativoAudio = mensagem.MediaLocalPath;
+                    if (caminhoRelativoAudio != null)
+                    {
+                        var nomeArquivo = Path.GetFileName(caminhoRelativoAudio);
+                        var caminho = CaminhoAudios.FirstOrDefault(p => p.Contains(nomeArquivo));
+                        if (caminho != null)
+                            return "<audio width=\"480\" controls><source src=\"" + caminho.Replace(".amr", ".mp3").Replace(".3ga", ".mp3") + "\">Seu navegador não suporta áudio HTML5.</audio>";
+                    }
+                    return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE ÁUDIO AUSENTE</span>";
+                    //return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
+                    break;
             }
-
-            return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE ÁUDIO AUSENTE</span>";
+            return "";
         }
-
-        //public static string ObterVideoDaMensagem2(Message mensagem)
-        //{
-
-        //}
+        
 
         public static string ObterVideoDaMensagem(Message mensagem)
         {
-            var conteudoHtml = "";
-            if (mensagem.ThumbImage.Contains("VID-"))
+            switch(Banco.TipoDispositivo)
             {
-                var nomeArquivo = mensagem.ThumbImage.Substring(mensagem.ThumbImage.IndexOf("VID-"), 23);
+                case TiposDispositivo.ANDROID:
+                    var conteudoHtml = "";
+                    if (mensagem.ThumbImage.Contains("VID-"))
+                    {
+                        var nomeArquivo = mensagem.ThumbImage.Substring(mensagem.ThumbImage.IndexOf("VID-"), 23);
 
-                var caminhoVideo = CaminhoVideos.FirstOrDefault(p => p.Contains(nomeArquivo));
+                        var caminhoVideo = CaminhoVideos.FirstOrDefault(p => p.Contains(nomeArquivo));
 
-                if (!String.IsNullOrWhiteSpace(caminhoVideo))
-                {
-                    if (File.Exists(Path.Combine(CaminhoPastaWhatsApp, caminhoVideo.Replace("..\\", "").Replace(".mp4", "_.mp4"))))
-                        conteudoHtml = "<video width=\"480\" controls><source src=\"" + caminhoVideo.Replace(".mp4", "_.mp4") + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
-                    else
-                        conteudoHtml = "<video width=\"480\" controls><source src=\"" + caminhoVideo + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
-                }
+                        if (!String.IsNullOrWhiteSpace(caminhoVideo))
+                        {
+                            if (File.Exists(Path.Combine(CaminhoPastaWhatsApp, caminhoVideo.Replace("..\\", "").Replace(".mp4", "_.mp4"))))
+                                conteudoHtml = "<video width=\"480\" controls><source src=\"" + caminhoVideo.Replace(".mp4", "_.mp4") + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
+                            else
+                                conteudoHtml = "<video width=\"480\" controls><source src=\"" + caminhoVideo + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
+                        }
+                    }
+
+                    var dataPesquisa = mensagem.Timestamp.Date < mensagem.ReceivedTimestamp ? mensagem.Timestamp.Date : mensagem.ReceivedTimestamp;
+
+                    while (dataPesquisa < DateTime.Today)
+                    {
+                        foreach (var video in CaminhoVideos.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
+                        {
+                            var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, video.Replace("..\\", "")));
+                            if (fi.Length == mensagem.MediaSize)
+                                if (File.Exists(Path.Combine(CaminhoPastaWhatsApp, video.Replace("..\\", "").Replace(".mp4", "_.mp4"))))
+                                    conteudoHtml = "<video width=\"480\" controls><source src=\"" + video.Replace(".mp4", "_.mp4") + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
+                                else
+                                    conteudoHtml = "<video width=\"480\" controls><source src=\"" + video + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
+                        }
+                        dataPesquisa = dataPesquisa.AddDays(1);
+                    }
+
+
+
+                    if (conteudoHtml == "")
+                    {
+                        conteudoHtml = "<span style=\"color: red\" font-weight:bold>ARQUIVO DE VÍDEO AUSENTE</span>";
+                        //conteudoHtml = "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
+                    }
+                    if (!String.IsNullOrWhiteSpace(mensagem.MediaCaption))
+                        conteudoHtml += "<span style=\"color: green; margin-left:5px; margin-right:5px;\" font-weight=bold>LEGENDA DO VÍDEO: " + mensagem.MediaCaption + "</span>";
+
+                    return conteudoHtml;
+                case TiposDispositivo.IOS:
+                    var caminhoRelativoVideo = mensagem.MediaLocalPath;
+                    if (caminhoRelativoVideo != null)
+                    {
+                        var nomeArquivo = Path.GetFileName(caminhoRelativoVideo);
+                        var caminho = CaminhoVideos.FirstOrDefault(p => p.Contains(nomeArquivo));
+                        if (caminho != null)
+                            return "<video width=\"480\" controls><source src=\"" + caminho + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
+
+                    }
+                    return "<span style=\"color: red\" font-weight:bold>ARQUIVO DE VÍDEO AUSENTE</span>";
+                    //return "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
+                    break;
+
             }
-
-            var dataPesquisa = mensagem.Timestamp.Date < mensagem.ReceivedTimestamp ? mensagem.Timestamp.Date : mensagem.ReceivedTimestamp;
-
-            while (dataPesquisa < DateTime.Today)
-            {
-                foreach (var video in CaminhoVideos.Where(p => p.Contains(dataPesquisa.ToString("yyyyMMdd"))))
-                {
-                    var fi = new FileInfo(Path.Combine(CaminhoPastaWhatsApp, video.Replace("..\\", "")));
-                    if (fi.Length == mensagem.MediaSize)
-                        if (File.Exists(Path.Combine(CaminhoPastaWhatsApp, video.Replace("..\\", "").Replace(".mp4", "_.mp4"))))
-                            conteudoHtml = "<video width=\"480\" controls><source src=\"" + video.Replace(".mp4", "_.mp4") + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
-                        else
-                            conteudoHtml = "<video width=\"480\" controls><source src=\"" + video + "\" type=\"video/mp4\">Seu navegador não suporta vídeo HTML5.</video>";
-                }
-                dataPesquisa = dataPesquisa.AddDays(1);
-            }
-
-
-
-            if (conteudoHtml == "")
-            {
-                conteudoHtml = "<span style=\"color: red\" font-weight:bold>ARQUIVO DE VÍDEO AUSENTE</span>";
-                //conteudoHtml = "<img style=\"width: 480px; height: auto; align: " + (mensagem.KeyFromMe == 1 ? "right" : "left") + "\" src=\"data:image/jpg;base64," + Convert.ToBase64String(mensagem.RawData) + "\">";
-            }
-            if (!String.IsNullOrWhiteSpace(mensagem.MediaCaption))
-                conteudoHtml += "<span style=\"color: green; margin-left:5px; margin-right:5px;\" font-weight=bold>LEGENDA DO VÍDEO: " + mensagem.MediaCaption + "</span>";
-
-            return conteudoHtml;
+            return "";            
         }
 
 

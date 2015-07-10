@@ -52,7 +52,7 @@ namespace WAReporter
                 // Open document 
                 arquivoTextBox.Text = dlg.FileName;
 
-                var pathWaDb = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dlg.FileName), "wa.db");
+                var pathWaDb = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dlg.FileName), "Contacts.sqlite");
                 if (File.Exists(pathWaDb) && String.IsNullOrWhiteSpace(contactsSqliteTextBox.Text))
                     contactsSqliteTextBox.Text = pathWaDb;
             }

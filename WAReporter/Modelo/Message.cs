@@ -21,6 +21,7 @@ namespace WAReporter.Modelo
         public String MediaName { get; set; }
         public String MediaCaption { get; set; }
         public String MediaHash { get; set; }
+        public String MediaLocalPath { get; set; }
         public int MediaDuration { get; set; }
         public double Origin{ get; set; }
         public String Latitude { get; set; }

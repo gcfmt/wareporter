@@ -25,6 +25,7 @@ namespace WAReporter.Modelo
         public String WaName { get; set; }
         public String SortName { get; set; }
         public String Callability { get; set; }
+        public String PicturePath { get; set; }
 
         public String NomeContato { get; set; }
     }

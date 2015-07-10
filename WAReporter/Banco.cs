@@ -25,6 +25,8 @@ namespace WAReporter
         public static List<Receipt> Receipts { get; set; }
         public static List<WaContact> WaContacts { get; set; }
 
+        public static TiposDispositivo TipoDispositivo { get; set; }
+
         /// <summary>
         /// Inicializa a conexão e efetua o carregamento do banco sqlite Android de endereço definido por parâmetro
         /// </summary>
@@ -33,6 +35,8 @@ namespace WAReporter
         /// <param name="enderecoWaDb">String contendo o endereço do arquivo wa.db a ser carregado</param>
         public static String CarregarBancoAndroid(String enderecoMsgStore, String enderecoWaDb)
         {
+            TipoDispositivo = TiposDispositivo.ANDROID;
+
             String resultado = "";
             try
             {
@@ -268,7 +272,7 @@ namespace WAReporter
                         waContact.StatusTimestamp = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("status_timestamp")) ? DateTime.MinValue : waContactsReader.GetInt64(waContactsReader.GetOrdinal("status_timestamp")).TimeStampParaDateTime();
                         waContact.Number = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("number")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("number"));
                         waContact.RawContactId = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("raw_contact_id")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("raw_contact_id"));
-                        waContact.DisplayName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("display_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("display_name"));
+                            waContact.DisplayName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("display_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("display_name"));
                         waContact.PhoneType = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_type")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("phone_type"));
                         waContact.PhoneLabel = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_label")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("phone_label"));
                         waContact.UnseenMsgCount = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("unseen_msg_count")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("unseen_msg_count"));
@@ -334,6 +338,8 @@ namespace WAReporter
         /// <param name="enderecoContacts">String contendo o endereço do arquivo Contacts.sqlite a ser carregado</param>
         public static String CarregarBancoIPhone(String enderecoChatStorage, String enderecoContacts)
         {
+            TipoDispositivo = TiposDispositivo.IOS;
+
             String resultado = "";
             try
             {
@@ -367,25 +373,27 @@ namespace WAReporter
 
                 #region importa group_participants
                 GroupParticipants = new List<GroupParticipant>();
-                try
-                {
-                    var groupParticipantReader = new SQLiteCommand("select * from ZWAGROUPMEMBER, ZWAGROUPINFO where ZWAGROUPMEMBER.ZCHATSESSION = ZWAGROUPINFO.Z_PK;", ConexaoChatStorage).ExecuteReader();
+                //try
+                //{
+                    var groupParticipantReader = new SQLiteCommand("select * from (select * from ZWAGROUPMEMBER LEFT JOIN ZWAGROUPINFO on "+
+                        "ZWAGROUPMEMBER.ZCHATSESSION = ZWAGROUPINFO.Z_PK) LEFT JOIN ZWACHATSESSION on ZCHATSESSION = ZWACHATSESSION.Z_PK;", ConexaoChatStorage).ExecuteReader();
                     while (groupParticipantReader.Read())
                     {
                         var groupParticipant = new GroupParticipant();
-                        groupParticipant.Id = groupParticipantReader.GetInt32(chatSessionReader.GetOrdinal("Z_PK"));
-                        groupParticipant.Gjid = groupParticipantReader.GetString(chatSessionReader.GetOrdinal("ZCONTACTJID"));
-                        groupParticipant.Jid = groupParticipantReader.GetString(chatSessionReader.GetOrdinal("ZMEMBERJID"));
-                        groupParticipant.Admin = groupParticipantReader.GetInt32(chatSessionReader.GetOrdinal("ZISADMIN"));
+                        groupParticipant.Id = groupParticipantReader.GetInt32(groupParticipantReader.GetOrdinal("Z_PK"));
+                        groupParticipant.Gjid = groupParticipantReader.GetString(groupParticipantReader.GetOrdinal("ZCONTACTJID"));
+                        groupParticipant.Jid = groupParticipantReader.GetString(groupParticipantReader.GetOrdinal("ZMEMBERJID"));
+                        groupParticipant.Admin = groupParticipantReader.GetInt32(groupParticipantReader.GetOrdinal("ZISADMIN"));
+                        groupParticipant.ContactName = groupParticipantReader.GetString(groupParticipantReader.GetOrdinal("ZCONTACTNAME"));
                         //groupParticipant.Pending = groupParticipantReader.IsDBNull(4) ? -1 : groupParticipantReader.GetInt32(4);
 
                         GroupParticipants.Add(groupParticipant);
                     }
-                }
-                catch (Exception ex)
-                {
-                    if (!ex.Message.Contains("no such table")) throw ex;
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    if (!ex.Message.Contains("no such table")) throw ex;
+                //}
 
                 foreach (var chat in Chats.Where(p => p.KeyRemoteJid.Contains("-")))
                 {
@@ -443,7 +451,7 @@ namespace WAReporter
 
                 #region importa messages
                 Messages = new List<Message>();
-                var messagesReader = new SQLiteCommand("select * from ZWAMESSAGE left join ZWAMEDIAITEM on ZWAMESSAGE.Z_PK = ZWAMEDIAITEM.ZMESSAGE;", ConexaoChatStorage).ExecuteReader();
+                var messagesReader = new SQLiteCommand("select * from (select * from ZWAMESSAGE left join ZWAMEDIAITEM on ZWAMESSAGE.Z_PK = ZWAMEDIAITEM.ZMESSAGE) left join ZWAGROUPMEMBER on ZGROUPMEMBER = ZWAGROUPMEMBER.Z_PK;", ConexaoChatStorage).ExecuteReader();
                 while (messagesReader.Read())
                 {
                     var message = new Message();
@@ -457,11 +465,23 @@ namespace WAReporter
                     message.Status = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZMESSAGESTATUS")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("ZMESSAGESTATUS"));
                     message.Data = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZTEXT")) ? "" :  messagesReader.GetString(messagesReader.GetOrdinal("ZTEXT"));
                     message.MediaUrl = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZMEDIAURL")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("ZMEDIAURL"));
+                    message.MediaLocalPath = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZMEDIALOCALPATH")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("ZMEDIALOCALPATH"));
                    
 
                     message.Latitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZLATITUDE")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("ZLATITUDE")).ToString();
                     message.Longitude = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZLONGITUDE")) ? "" : messagesReader.GetValue(messagesReader.GetOrdinal("ZLONGITUDE")).ToString();
                     message.ThumbImage = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZXMPPTHUMBPATH")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("ZXMPPTHUMBPATH"));
+
+                    if(message.KeyFromMe == 0 && message.KeyRemoteJid.Contains("."))
+                        message.RemoteResource = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZMEMBERJID")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("ZMEMBERJID"));
+
+                    message.MediaWaType = messagesReader.IsDBNull(messagesReader.GetOrdinal("ZMESSAGETYPE")) ? MediaWhatsappType.MEDIA_WHATSAPP_TEXT :
+                     (MediaWhatsappType)Enum.Parse(typeof(MediaWhatsappType), messagesReader.GetInt32(messagesReader.GetOrdinal("ZMESSAGETYPE")).ToString());
+
+                    if (message.MediaWaType == MediaWhatsappType.MEDIA_WHATSAPP_VIDEO)
+                        message.MediaWaType = MediaWhatsappType.MEDIA_WHATSAPP_AUDIO;
+                    else if (message.MediaWaType == MediaWhatsappType.MEDIA_WHATSAPP_AUDIO)
+                        message.MediaWaType = MediaWhatsappType.MEDIA_WHATSAPP_VIDEO;   
 
                     //message.MediaDuration = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_duration")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("media_duration"));
                     //message.Origin = messagesReader.IsDBNull(messagesReader.GetOrdinal("origin")) ? -1 : messagesReader.GetDouble(messagesReader.GetOrdinal("origin"));
@@ -475,7 +495,6 @@ namespace WAReporter
                     //message.MediaHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_hash"));
                     //message.MediaCaption = messagesReader.IsDBNull(messagesReader.GetOrdinal("media_caption")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("media_caption"));
 
-                    //message.RemoteResource = messagesReader.IsDBNull(messagesReader.GetOrdinal("remote_resource")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("remote_resource"));
                     //message.ReceivedTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("received_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("received_timestamp")).TimeStampParaDateTime();
                     //message.SendTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("send_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("send_timestamp")).TimeStampParaDateTime();
                     //message.ReceiptServerTimestamp = messagesReader.IsDBNull(messagesReader.GetOrdinal("receipt_server_timestamp")) ? DateTime.MinValue : messagesReader.GetInt64(messagesReader.GetOrdinal("receipt_server_timestamp")).TimeStampParaDateTime();
@@ -488,8 +507,13 @@ namespace WAReporter
                     //message.RecipientCount = messagesReader.IsDBNull(messagesReader.GetOrdinal("recipient_count")) ? -1 : messagesReader.GetInt32(messagesReader.GetOrdinal("recipient_count"));
                     //message.ParticipantHash = messagesReader.IsDBNull(messagesReader.GetOrdinal("participant_hash")) ? "" : messagesReader.GetString(messagesReader.GetOrdinal("participant_hash"));
 
-                    var dataBanco = messagesReader.GetString(messagesReader.GetOrdinal("ZMESSAGEDATE")).Split('.')[0];
-                    message.Timestamp = (Convert.ToInt64(dataBanco) + 11323 * 60 * 1440).TimeStampParaDateTime();
+
+                    var dataBanco = messagesReader.GetDouble(messagesReader.GetOrdinal("ZMESSAGEDATE"));
+                    var d2 = (Convert.ToInt64(dataBanco));
+
+                    var d3 = (978307200 + d2) * 1000;
+
+                    message.Timestamp = (d3).TimeStampParaDateTime();
                     
                     Messages.Add(message);
                 }
@@ -537,43 +561,39 @@ namespace WAReporter
                     ConexaoContatos.Open();
 
                     #region importa wa_contacts
-                    var waContactsReader = new SQLiteCommand("select * from wa_contacts;", ConexaoContatos).ExecuteReader();
+                    var waContactsReader = new SQLiteCommand("select * from (select ZWACONTACT.Z_PK as ID, ZWACONTACT.ZFIRSTNAME,  ZWACONTACT.ZFULLNAME, "+
+                        "ZWAPHONE.Z_PK, ZWAPHONE.ZPHONE as NUMERO from ZWACONTACT LEFT JOIN ZWAPHONE on ZWACONTACT.Z_PK = ZWAPHONE.ZCONTACT) Z1 "+
+                        "LEFT JOIN ZWASTATUS ON  Z1.Z_PK = ZWASTATUS.ZPHONE;", ConexaoContatos).ExecuteReader();
                     while (waContactsReader.Read())
                     {
                         var waContact = new WaContact();
-                        waContact.Id = waContactsReader.GetInt32(waContactsReader.GetOrdinal("_id"));
-                        waContact.Jid = waContactsReader.GetString(waContactsReader.GetOrdinal("jid"));
-                        waContact.IsWhatsappUser = waContactsReader.GetBoolean(waContactsReader.GetOrdinal("is_whatsapp_user"));
-                        waContact.Status = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("status")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("status"));
-                        waContact.StatusTimestamp = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("status_timestamp")) ? DateTime.MinValue : waContactsReader.GetInt64(waContactsReader.GetOrdinal("status_timestamp")).TimeStampParaDateTime();
-                        waContact.Number = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("number")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("number"));
-                        waContact.RawContactId = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("raw_contact_id")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("raw_contact_id"));
-                        waContact.DisplayName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("display_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("display_name"));
-                        waContact.PhoneType = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_type")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("phone_type"));
-                        waContact.PhoneLabel = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_label")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("phone_label"));
-                        waContact.UnseenMsgCount = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("unseen_msg_count")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("unseen_msg_count"));
-                        waContact.PhotoTs = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("photo_ts")) ? -1 : waContactsReader.GetInt64(waContactsReader.GetOrdinal("photo_ts"));
-                        waContact.ThumbTs = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("thumb_ts")) ? -1 : waContactsReader.GetInt64(waContactsReader.GetOrdinal("thumb_ts"));
-                        waContact.PhotoIdTimestamp = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("photo_id_timestamp")) ? DateTime.MinValue : waContactsReader.GetInt64(waContactsReader.GetOrdinal("photo_id_timestamp")).TimeStampParaDateTime();
-                        waContact.GivenName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("given_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("given_name"));
-                        waContact.FamilyName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("family_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("family_name"));
-                        waContact.WaName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("wa_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("wa_name"));
-                        waContact.SortName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("sort_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("sort_name"));
-                        waContact.Callability = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("callability")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("callability"));
+                        waContact.Id = waContactsReader.GetInt32(waContactsReader.GetOrdinal("ID"));
+                        waContact.Jid = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("ZWHATSAPPID")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("ZWHATSAPPID"));
+                        //waContact.IsWhatsappUser = waContactsReader.GetBoolean(waContactsReader.GetOrdinal("is_whatsapp_user"));
+                        waContact.Status = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("ZTEXT")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("ZTEXT"));
+                        //waContact.StatusTimestamp = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("status_timestamp")) ? DateTime.MinValue : waContactsReader.GetInt64(waContactsReader.GetOrdinal("status_timestamp")).TimeStampParaDateTime();
+                        waContact.Number = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("NUMERO")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("NUMERO"));
+                        //waContact.RawContactId = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("raw_contact_id")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("raw_contact_id"));
+                        waContact.DisplayName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("ZFIRSTNAME")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("ZFIRSTNAME"));
+                        //waContact.PhoneType = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_type")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("phone_type"));
+                        //waContact.PhoneLabel = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("phone_label")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("phone_label"));
+                        //waContact.UnseenMsgCount = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("unseen_msg_count")) ? -1 : waContactsReader.GetInt32(waContactsReader.GetOrdinal("unseen_msg_count"));
+                        //waContact.PhotoTs = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("photo_ts")) ? -1 : waContactsReader.GetInt64(waContactsReader.GetOrdinal("photo_ts"));
+                        //waContact.ThumbTs = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("thumb_ts")) ? -1 : waContactsReader.GetInt64(waContactsReader.GetOrdinal("thumb_ts"));
+                        //waContact.PhotoIdTimestamp = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("photo_id_timestamp")) ? DateTime.MinValue : waContactsReader.GetInt64(waContactsReader.GetOrdinal("photo_id_timestamp")).TimeStampParaDateTime();
+                        //waContact.GivenName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("given_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("given_name"));
+                        //waContact.FamilyName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("family_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("family_name"));
+                        waContact.WaName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("ZFULLNAME")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("ZFULLNAME"));
+                        //waContact.SortName = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("sort_name")) ? "" : waContactsReader.GetString(waContactsReader.GetOrdinal("sort_name"));
+                        waContact.Callability = waContactsReader.IsDBNull(waContactsReader.GetOrdinal("ZCALLABILITY")) ? "" : waContactsReader.GetInt32(waContactsReader.GetOrdinal("ZCALLABILITY")).ToString();
+                                                
+                        var nomeExibido = waContact.DisplayName;
+                        var nomeWa = waContact.WaName;
 
-                        bool isGrupo = waContact.Jid.Contains("-");
-                        if (!isGrupo)
-                        {
-                            var nomeExibido = waContact.DisplayName;
-                            var nomeWa = waContact.WaName;
-                            var telefone = waContact.Jid;
-
-                            waContact.NomeContato += !String.IsNullOrWhiteSpace(nomeExibido) && !String.IsNullOrWhiteSpace(nomeWa) ?
-                                                nomeExibido + ", " + nomeWa : nomeExibido + nomeWa;
-                            if (String.IsNullOrWhiteSpace(waContact.NomeContato)) waContact.NomeContato += waContact.Jid;
-                        }
-                        else waContact.NomeContato = waContact.DisplayName;
-
+                        waContact.NomeContato += !String.IsNullOrWhiteSpace(nomeExibido) && !String.IsNullOrWhiteSpace(nomeWa) ?
+                                            nomeExibido + ", " + nomeWa : nomeExibido + nomeWa;
+                        if (String.IsNullOrWhiteSpace(waContact.NomeContato)) waContact.NomeContato += waContact.Jid;
+                        
                         WaContacts.Add(waContact);
                     }
 
@@ -583,18 +603,33 @@ namespace WAReporter
                     ConexaoContatos.Close();
                 }
 
-                foreach (var chat in Chats) chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid) ?? new WaContact { Jid = chat.KeyRemoteJid, NomeContato = chat.KeyRemoteJid.Contains("-") ? chat.Subject : chat.KeyRemoteJid };
+                foreach (var chat in Chats)
+                {
+                    chat.Contato = WaContacts.FirstOrDefault(p => p.Jid == chat.KeyRemoteJid.Split('@')[0]) ??
+                        new WaContact { Jid = chat.KeyRemoteJid, NomeContato = chat.KeyRemoteJid.Contains("-") ? chat.Subject : chat.KeyRemoteJid };
+                }
 
-                foreach (var groupParticipant in GroupParticipants) groupParticipant.Contato = WaContacts.FirstOrDefault(p => p.Jid == groupParticipant.Jid) ?? new WaContact { Jid = groupParticipant.Jid, NomeContato = groupParticipant.Jid };
+                foreach (var groupParticipant in GroupParticipants)
+                {
+                        if (Banco.TipoDispositivo == TiposDispositivo.ANDROID)
+                            groupParticipant.Contato = new WaContact { Jid = groupParticipant.Jid, NomeContato = groupParticipant.Jid };
+                        else if (Banco.TipoDispositivo == TiposDispositivo.IOS)
+                            groupParticipant.Contato = new WaContact { Jid = groupParticipant.Jid, NomeContato = groupParticipant.ContactName };
+                        WaContacts.Add(groupParticipant.Contato);
+                }
 
-                foreach (var message in Messages) message.Contato = WaContacts.FirstOrDefault(p => message.KeyRemoteJid.Contains("-") ? p.Jid == message.RemoteResource : p.Jid == message.KeyRemoteJid) ?? new WaContact { Jid = message.RemoteResource, NomeContato = message.RemoteResource };
-
-
-
-
-
-
-
+                foreach (var message in Messages)
+                {
+                    if (message.KeyRemoteJid.Contains("-"))
+                    {
+                        message.Contato = WaContacts.LastOrDefault(p => p.Jid == message.RemoteResource) ??
+                            new WaContact { Jid = message.KeyRemoteJid, NomeContato = message.KeyRemoteJid+"_)" };
+                    }
+                    else
+                        message.Contato = WaContacts.FirstOrDefault(p => p.Jid == message.KeyRemoteJid.Split('@')[0]) ??
+                            new WaContact { Jid = message.KeyRemoteJid, NomeContato = message.KeyRemoteJid };
+                }
+                
                 resultado = "SUCESSO: Bancos de Dados Carregados.";
 
             }
@@ -603,8 +638,14 @@ namespace WAReporter
                 resultado = "ERRO: " + ex.Message;
             }
 
+
             return resultado;
         }
+    }
 
+    public enum TiposDispositivo
+    {
+        ANDROID,
+        IOS
     }
 }

@@ -46,6 +46,7 @@
                 <DataGridTextColumn Binding="{Binding UltimaMensagem, Mode=TwoWay}" Width="40*" Header="Última Mensagem" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
+        <StackPanel Orientation="Horizontal"/>
         <StackPanel Orientation="Horizontal" Margin="5" x:Name="selecaoChatsStackPanel">
             <Button x:Name="selecionarTodosButton" Margin="0,0,5,0" Content="Selecionar Todos" Click="selecionarTodosButton_Click"/>
             <Button x:Name="selecionarNenhumButton" Margin="0,0,5,0" Content="Selecionar Nenhum" Click="selecionarNenhumButton_Click"/>

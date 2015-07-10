@@ -59,9 +59,45 @@ namespace WAReporter
 
 
             arquivoHtml.WriteLine("<h2 style=\"text-align:center\">Relatório de Conversações WhatsApp<h2>");
-            arquivoHtml.WriteLine("<h4 style=\"text-align:center; margin-bottom:30px;\">Gerência de Computação Forense - POLITEC/MT<h4>");
+            arquivoHtml.WriteLine("<h4 style=\"text-align:center; margin-bottom:70px;\">Gerência de Computação Forense - POLITEC/MT<h4>");
+
+
+            #region Usuário
+            arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Identificação do Usuário<h3>");
+            arquivoHtml.WriteLine("<table style=\"font-size:13px; margin-bottom:100px;\">");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<th style=\"text-align: center\"><b>Identificador/Número WhatsApp:</b></th>");
+            arquivoHtml.WriteLine("</tr>");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<td style=\"text-align: center\">" + Midia.TelefoneUsuario + "</td>");
+            arquivoHtml.WriteLine("</tr>");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<th style=\"text-align: center\"><b>Nome de Exibição:</b></th>");
+            arquivoHtml.WriteLine("</tr>");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<td style=\"text-align: center\">" + Midia.NomeUsuario + "</td>");
+            arquivoHtml.WriteLine("</tr>");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<th style=\"text-align: center\"><b>Status do Usuário:</b></th>");
+            arquivoHtml.WriteLine("</tr>");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<td style=\"text-align: center\">" + Midia.StatusUsuario + "</td>");
+            arquivoHtml.WriteLine("</tr>");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<th style=\"text-align: center\"><b>Imagem de Exibição:</b></th>");
+            arquivoHtml.WriteLine("</tr>");
+            arquivoHtml.WriteLine("<tr>");
+            arquivoHtml.WriteLine("<td style=\"text-align: center\"><img style=\"width: 480px; height: auto; align: left\" src=\"" + Midia.CaminhoFotoPessoal + "\"></td>");
+            arquivoHtml.WriteLine("</tr>");
+
+
+            arquivoHtml.WriteLine("</table>");
+
+
+            #endregion
 
             #region Chats
+            arquivoHtml.WriteLine("<a name=\"chats\"></a>");
             arquivoHtml.WriteLine("<h3 style=\"text-align:center\">Chats (Conversações)<h3>");
             arquivoHtml.WriteLine("<table  style=\"font-size:13px; margin-bottom:100px;\">");
             arquivoHtml.WriteLine("<tr>");
@@ -101,7 +137,7 @@ namespace WAReporter
                 arquivoHtml.WriteLine("<th style=\"text-align: left, valign=center, background:white\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
                 arquivoHtml.WriteLine("<span>" + Midia.AdicionaEmoji(chat.Subject)  + "</span></td>");
                 arquivoHtml.WriteLine("<th style=\"font-weight:bold\"><b>Participantes do Grupo</b></td>");
-                arquivoHtml.WriteLine("<th colspan=2 style=\"text-align: right\"><a href=\"#\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a></td>");
+                arquivoHtml.WriteLine("<th colspan=2 style=\"text-align: right\"><a href=\"#chats\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a></td>");
                 arquivoHtml.WriteLine("</tr>");
                 arquivoHtml.WriteLine("</table>");
                                 
@@ -121,8 +157,13 @@ namespace WAReporter
                     arquivoHtml.WriteLine("<td>" + participant.Jid + "</td>");
                     arquivoHtml.WriteLine("<td><img style=\"width: 40px; height: 40px; \" src=\"" + Midia.ObterAvatar(participant.Jid) + "\"></td>");
 
-                    arquivoHtml.WriteLine("<td style=\"text-align: left\" width=\"350px\">" + (participant.Contato != null ?
-                        Midia.AdicionaEmoji(participant.Contato.NomeContato) : "") + "</td>");
+                    var nomeContato = participant.Contato != null && Banco.TipoDispositivo == TiposDispositivo.ANDROID ? participant.Contato.NomeContato :
+                        Banco.TipoDispositivo == TiposDispositivo.IOS ? participant.ContactName : participant.Jid;
+
+                    if (Midia.TelefoneUsuario.Contains(participant.Jid))
+                        nomeContato = Midia.NomeUsuario;
+
+                    arquivoHtml.WriteLine("<td style=\"text-align: left\" width=\"350px\">" + nomeContato + "</td>");
 
                     arquivoHtml.WriteLine("<td>"+(participant.Admin == 1 ? "Administrador" : "" )+"</td>");
                     arquivoHtml.WriteLine("</tr>");                   
@@ -143,7 +184,7 @@ namespace WAReporter
                 arquivoHtml.WriteLine("<th style=\"text-align: left,  valign=center, background:#FFFFFF\"><img style=\"width: 100px; height: 100px; \" src=\"" + Midia.ObterAvatar(chat.KeyRemoteJid) + "\">");
                 arquivoHtml.WriteLine("<span>" + Midia.AdicionaEmoji(chat.Contato.NomeContato) + "</span></th>");
                 arquivoHtml.WriteLine("<th style=\"font-weight:bold\"><b>Mensagens</b></th>");
-                arquivoHtml.WriteLine("<th colspan=2 style=\"text-align: right\"><a href=\"#\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a></td>");
+                arquivoHtml.WriteLine("<th colspan=2 style=\"text-align: right\"><a href=\"#chats\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a></td>");
                 arquivoHtml.WriteLine("</tr>");
                 arquivoHtml.WriteLine("</table>");
 
@@ -158,11 +199,11 @@ namespace WAReporter
                 foreach (var mensagem in chat.Mensagens)
                 {
                     if ((mensagem == chat.Mensagens.ElementAt(0) || mensagem == chat.Mensagens.ElementAt(1)) && isGrupo) continue;
-
+                    
                     arquivoHtml.WriteLine("<tr>");                   
                     
                     arquivoHtml.WriteLine("<td style=\"text-align:" + (mensagem.KeyFromMe == 1 ? "right" : "left") + "; valign=bottom;  \">");
-                    arquivoHtml.WriteLine(mensagem.Id);
+                    //arquivoHtml.WriteLine("msg_"+mensagem.Id);
 
                     switch (mensagem.MediaWaType)
                     {
@@ -209,9 +250,8 @@ namespace WAReporter
                             }
                             break;
                     }
-
-                    if(mensagem.KeyFromMe == 0)
-                        arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color: #663300\"><b>" + Midia.AdicionaEmoji(mensagem.Contato.NomeContato) + " </b></span>");
+                   
+                    arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color: #663300\"><b>" + (mensagem.KeyFromMe == 1 ? Midia.NomeUsuario : Midia.AdicionaEmoji(mensagem.Contato.NomeContato) ) + " </b></span>");
                     arquivoHtml.WriteLine("<span style=\"font-size:12px; margin-left:5px; font-weight: bold; color: #001D72\"><b>" + mensagem.Timestamp + "</b></span>");
 
                     arquivoHtml.WriteLine("</div>");
@@ -221,7 +261,7 @@ namespace WAReporter
                     arquivoHtml.WriteLine("<td>");
                     arquivoHtml.WriteLine("<a href=\"#msg-" + chat.KeyRemoteJid + "\"><img src=\"data/icon/angle-up.png\" title=\"Ir para o início do chat\" alt=\"\"/></a>");
                     arquivoHtml.WriteLine("</td><td>");
-                    arquivoHtml.WriteLine("<a href=\"#\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a>");
+                    arquivoHtml.WriteLine("<a href=\"#chats\"><img src=\"data/icon/angle-double-up.png\" title=\"Ir para a lista de chats\" alt=\"\"/></a>");
                     arquivoHtml.WriteLine("</td>");
 
                     arquivoHtml.WriteLine("</tr>");
