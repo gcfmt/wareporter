@@ -82,6 +82,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Emoji.cs" />
+    <Compile Include="GeradorRelatorioFrame.cs" />
     <Compile Include="GeradorRelatorio.cs" />
     <Compile Include="JanelaAbrirArquivoIPhone.xaml.cs">
       <DependentUpon>JanelaAbrirArquivoIPhone.xaml</DependentUpon>
